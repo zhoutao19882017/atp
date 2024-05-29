@@ -1,0 +1,39 @@
+spring:
+  datasource:
+    main:
+      url: jdbc:mysql://localhost:3306/atp?useUnicode=true&characterEncoding=utf-8&useLegacyDatetimeCode=false&serverTimezone=Asia/Shanghai
+      username: atp
+      password: atp
+      driver-class-name: com.mysql.cj.jdbc.Driver
+      type: com.alibaba.druid.pool.DruidDataSource
+    druid:
+      filters: stat, wall, log4j2
+      filter:
+        stat: #状态监控过滤器
+          enabled: true
+          db-type: mysql
+          log-slow-sql: true  #开启慢sql监控，超过指定时间则认为是慢sql，记录到日志中
+          slow-sql-millis: 5000
+        log4j2: #日志监控过滤器，使用slf4j 进行日志输出
+          enabled: true
+        wall: #防火墙过滤器
+          enabled: true
+      # StatViewServlet配置，说明请参考Druid Wiki，配置_StatViewServlet配置
+      stat-view-servlet:
+        enabled: true                                                                 #是否开启内置监控页面，默认值为 false
+        url-pattern: '/druid/*'                                                       #StatViewServlet 的映射路径，即内置监控页面的访问地址
+        reset-enable: true                                                            #是否启用重置按钮
+        login-username: admin                                                         #内置监控页面的登录页用户名 username
+        login-password: admin@2024                                                    #内置监控页面的登录页密码 password
+      # WebStatFilter配置，说明请参考Druid Wiki，配置_配置WebStatFilter
+      web-stat-filter:
+        enabled: true                                                                 #是否开启内置监控中的 Web-jdbc 关联监控的数据
+        url-pattern: '/*'                                                             #匹配路径
+        exclusions: '*.js,*.gif,*.jpg,*.png,*.css,*.ico,/druid/*'                     #排除路径
+        session-stat-enable: true
+
+logging:
+  config: classpath:logback-spring-dev.xml
+  level:
+    root: debug
+    com.bcs: debug

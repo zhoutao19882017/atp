@@ -1,0 +1,479 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-latest.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+    <changeSet author="scott (generated)" id="1706687599755-1">
+        <createTable tableName="_prisma_migrations">
+            <column name="id" type="VARCHAR(36)">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="_prisma_migrations_pkey"/>
+            </column>
+            <column name="checksum" type="VARCHAR(64)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="finished_at" type="TIMESTAMP WITH TIME ZONE"/>
+            <column name="migration_name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="logs" type="TEXT"/>
+            <column name="rolled_back_at" type="TIMESTAMP WITH TIME ZONE"/>
+            <column defaultValueComputed="now()" name="started_at" type="TIMESTAMP WITH TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="applied_steps_count" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="scott (generated)" id="1706687599755-2">
+        <createTable tableName="TeamCollection">
+            <column name="id" type="TEXT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="TeamCollection_pkey"/>
+            </column>
+            <column name="parentID" type="TEXT"/>
+            <column name="teamID" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="title" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="orderIndex" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueComputed="CURRENT_TIMESTAMP" name="createdOn" type="TIMESTAMP(3) WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updatedOn" type="TIMESTAMP(3) WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="data" type="JSONB"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="scott (generated)" id="1706687599755-3">
+        <createTable tableName="TeamRequest">
+            <column name="id" type="TEXT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="TeamRequest_pkey"/>
+            </column>
+            <column name="collectionID" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="teamID" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="title" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="request" type="JSONB">
+                <constraints nullable="false"/>
+            </column>
+            <column name="orderIndex" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueComputed="CURRENT_TIMESTAMP" name="createdOn" type="TIMESTAMP(3) WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updatedOn" type="TIMESTAMP(3) WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="scott (generated)" id="1706687599755-4">
+        <createTable tableName="Shortcode">
+            <column name="id" type="TEXT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="Shortcode_pkey"/>
+            </column>
+            <column name="request" type="JSONB">
+                <constraints nullable="false"/>
+            </column>
+            <column name="creatorUid" type="TEXT"/>
+            <column defaultValueComputed="CURRENT_TIMESTAMP" name="createdOn" type="TIMESTAMP(3) WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="embedProperties" type="JSONB"/>
+            <column defaultValueComputed="CURRENT_TIMESTAMP" name="updatedOn" type="TIMESTAMP(3) WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="scott (generated)" id="1706687599755-5">
+        <createTable tableName="User">
+            <column name="uid" type="TEXT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="User_pkey"/>
+            </column>
+            <column name="displayName" type="TEXT"/>
+            <column name="email" type="TEXT"/>
+            <column name="photoURL" type="TEXT"/>
+            <column defaultValueBoolean="false" name="isAdmin" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+            <column name="refreshToken" type="TEXT"/>
+            <column name="currentRESTSession" type="JSONB"/>
+            <column name="currentGQLSession" type="JSONB"/>
+            <column defaultValueComputed="CURRENT_TIMESTAMP" name="createdOn" type="TIMESTAMP(3) WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="scott (generated)" id="1706687599755-6">
+        <createTable tableName="Account">
+            <column name="id" type="TEXT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="Account_pkey"/>
+            </column>
+            <column name="userId" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="provider" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="providerAccountId" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="providerRefreshToken" type="TEXT"/>
+            <column name="providerAccessToken" type="TEXT"/>
+            <column name="providerScope" type="TEXT"/>
+            <column defaultValueComputed="CURRENT_TIMESTAMP" name="loggedIn" type="TIMESTAMP(3) WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="scott (generated)" id="1706687599755-7">
+        <createTable tableName="InvitedUsers">
+            <column name="adminUid" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="adminEmail" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="inviteeEmail" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueComputed="CURRENT_TIMESTAMP" name="invitedOn" type="TIMESTAMP(3) WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="scott (generated)" id="1706687599755-8">
+        <createTable tableName="VerificationToken">
+            <column name="deviceIdentifier" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="token" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="userUid" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="expiresOn" type="TIMESTAMP(3) WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="scott (generated)" id="1706687599755-9">
+        <createTable tableName="UserSettings">
+            <column name="id" type="TEXT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="UserSettings_pkey"/>
+            </column>
+            <column name="userUid" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="properties" type="JSONB">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updatedOn" type="TIMESTAMP(3) WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="scott (generated)" id="1706687599755-10">
+        <createTable tableName="InfraConfig">
+            <column name="id" type="TEXT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="InfraConfig_pkey"/>
+            </column>
+            <column name="name" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="value" type="TEXT"/>
+            <column defaultValueBoolean="true" name="active" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueComputed="CURRENT_TIMESTAMP" name="createdOn" type="TIMESTAMP(3) WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updatedOn" type="TIMESTAMP(3) WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="scott (generated)" id="1706687599755-11">
+        <createTable tableName="TeamMember">
+            <column name="id" type="TEXT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="TeamMember_pkey"/>
+            </column>
+            <column name="role" type="TEAMMEMBERROLE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="userUid" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="teamID" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="scott (generated)" id="1706687599755-12">
+        <createTable tableName="TeamInvitation">
+            <column name="id" type="TEXT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="TeamInvitation_pkey"/>
+            </column>
+            <column name="teamID" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="creatorUid" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="inviteeEmail" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="inviteeRole" type="TEAMMEMBERROLE">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="scott (generated)" id="1706687599755-13">
+        <createIndex indexName="Shortcode_id_creatorUid_key" tableName="Shortcode" unique="true">
+            <column name="id"/>
+            <column name="creatorUid"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="scott (generated)" id="1706687599755-14">
+        <createIndex indexName="User_email_key" tableName="User" unique="true">
+            <column name="email"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="scott (generated)" id="1706687599755-15">
+        <createIndex indexName="Account_provider_providerAccountId_key" tableName="Account" unique="true">
+            <column name="provider"/>
+            <column name="providerAccountId"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="scott (generated)" id="1706687599755-16">
+        <createTable tableName="UserHistory">
+            <column name="id" type="TEXT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="UserHistory_pkey"/>
+            </column>
+            <column name="userUid" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="reqType" type="REQTYPE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="request" type="JSONB">
+                <constraints nullable="false"/>
+            </column>
+            <column name="responseMetadata" type="JSONB">
+                <constraints nullable="false"/>
+            </column>
+            <column name="isStarred" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueComputed="CURRENT_TIMESTAMP" name="executedOn" type="TIMESTAMP(3) WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="scott (generated)" id="1706687599755-17">
+        <createTable tableName="UserRequest">
+            <column name="id" type="TEXT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="UserRequest_pkey"/>
+            </column>
+            <column name="collectionID" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="userUid" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="title" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="request" type="JSONB">
+                <constraints nullable="false"/>
+            </column>
+            <column name="type" type="REQTYPE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="orderIndex" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueComputed="CURRENT_TIMESTAMP" name="createdOn" type="TIMESTAMP(3) WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updatedOn" type="TIMESTAMP(3) WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="scott (generated)" id="1706687599755-18">
+        <createTable tableName="UserCollection">
+            <column name="id" type="TEXT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="UserCollection_pkey"/>
+            </column>
+            <column name="parentID" type="TEXT"/>
+            <column name="userUid" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="title" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="orderIndex" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+            <column name="type" type="REQTYPE">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueComputed="CURRENT_TIMESTAMP" name="createdOn" type="TIMESTAMP(3) WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updatedOn" type="TIMESTAMP(3) WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="data" type="JSONB"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="scott (generated)" id="1706687599755-19">
+        <createIndex indexName="InvitedUsers_inviteeEmail_key" tableName="InvitedUsers" unique="true">
+            <column name="inviteeEmail"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="scott (generated)" id="1706687599755-20">
+        <createIndex indexName="VerificationToken_token_key" tableName="VerificationToken" unique="true">
+            <column name="token"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="scott (generated)" id="1706687599755-21">
+        <createIndex indexName="VerificationToken_deviceIdentifier_token_key" tableName="VerificationToken" unique="true">
+            <column name="deviceIdentifier"/>
+            <column name="token"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="scott (generated)" id="1706687599755-22">
+        <createIndex indexName="UserSettings_userUid_key" tableName="UserSettings" unique="true">
+            <column name="userUid"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="scott (generated)" id="1706687599755-23">
+        <createIndex indexName="InfraConfig_name_key" tableName="InfraConfig" unique="true">
+            <column name="name"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="scott (generated)" id="1706687599755-24">
+        <createIndex indexName="TeamMember_teamID_userUid_key" tableName="TeamMember" unique="true">
+            <column name="teamID"/>
+            <column name="userUid"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="scott (generated)" id="1706687599755-25">
+        <createIndex indexName="TeamInvitation_teamID_idx" tableName="TeamInvitation">
+            <column name="teamID"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="scott (generated)" id="1706687599755-26">
+        <createIndex indexName="TeamInvitation_teamID_inviteeEmail_key" tableName="TeamInvitation" unique="true">
+            <column name="teamID"/>
+            <column name="inviteeEmail"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="scott (generated)" id="1706687599755-27">
+        <createTable tableName="Team">
+            <column name="id" type="TEXT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="Team_pkey"/>
+            </column>
+            <column name="name" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="scott (generated)" id="1706687599755-28">
+        <createTable tableName="TeamEnvironment">
+            <column name="id" type="TEXT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="TeamEnvironment_pkey"/>
+            </column>
+            <column name="teamID" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="variables" type="JSONB">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="scott (generated)" id="1706687599755-29">
+        <createTable tableName="UserEnvironment">
+            <column name="id" type="TEXT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="UserEnvironment_pkey"/>
+            </column>
+            <column name="userUid" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name" type="TEXT"/>
+            <column name="variables" type="JSONB">
+                <constraints nullable="false"/>
+            </column>
+            <column name="isGlobal" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="scott (generated)" id="1706687599755-30">
+        <addForeignKeyConstraint baseColumnNames="userId" baseTableName="Account" constraintName="Account_userId_fkey" deferrable="false" initiallyDeferred="false" onDelete="CASCADE" onUpdate="CASCADE" referencedColumnNames="uid" referencedTableName="User" validate="true"/>
+    </changeSet>
+    <changeSet author="scott (generated)" id="1706687599755-31">
+        <addForeignKeyConstraint baseColumnNames="adminUid" baseTableName="InvitedUsers" constraintName="InvitedUsers_adminUid_fkey" deferrable="false" initiallyDeferred="false" onDelete="CASCADE" onUpdate="CASCADE" referencedColumnNames="uid" referencedTableName="User" validate="true"/>
+    </changeSet>
+    <changeSet author="scott (generated)" id="1706687599755-32">
+        <addForeignKeyConstraint baseColumnNames="creatorUid" baseTableName="Shortcode" constraintName="Shortcode_creatorUid_fkey" deferrable="false" initiallyDeferred="false" onDelete="SET NULL" onUpdate="CASCADE" referencedColumnNames="uid" referencedTableName="User" validate="true"/>
+    </changeSet>
+    <changeSet author="scott (generated)" id="1706687599755-33">
+        <addForeignKeyConstraint baseColumnNames="parentID" baseTableName="TeamCollection" constraintName="TeamCollection_parentID_fkey" deferrable="false" initiallyDeferred="false" onDelete="SET NULL" onUpdate="CASCADE" referencedColumnNames="id" referencedTableName="TeamCollection" validate="true"/>
+    </changeSet>
+    <changeSet author="scott (generated)" id="1706687599755-34">
+        <addForeignKeyConstraint baseColumnNames="teamID" baseTableName="TeamCollection" constraintName="TeamCollection_teamID_fkey" deferrable="false" initiallyDeferred="false" onDelete="CASCADE" onUpdate="CASCADE" referencedColumnNames="id" referencedTableName="Team" validate="true"/>
+    </changeSet>
+    <changeSet author="scott (generated)" id="1706687599755-35">
+        <addForeignKeyConstraint baseColumnNames="teamID" baseTableName="TeamEnvironment" constraintName="TeamEnvironment_teamID_fkey" deferrable="false" initiallyDeferred="false" onDelete="CASCADE" onUpdate="CASCADE" referencedColumnNames="id" referencedTableName="Team" validate="true"/>
+    </changeSet>
+    <changeSet author="scott (generated)" id="1706687599755-36">
+        <addForeignKeyConstraint baseColumnNames="teamID" baseTableName="TeamInvitation" constraintName="TeamInvitation_teamID_fkey" deferrable="false" initiallyDeferred="false" onDelete="CASCADE" onUpdate="CASCADE" referencedColumnNames="id" referencedTableName="Team" validate="true"/>
+    </changeSet>
+    <changeSet author="scott (generated)" id="1706687599755-37">
+        <addForeignKeyConstraint baseColumnNames="teamID" baseTableName="TeamMember" constraintName="TeamMember_teamID_fkey" deferrable="false" initiallyDeferred="false" onDelete="CASCADE" onUpdate="CASCADE" referencedColumnNames="id" referencedTableName="Team" validate="true"/>
+    </changeSet>
+    <changeSet author="scott (generated)" id="1706687599755-38">
+        <addForeignKeyConstraint baseColumnNames="collectionID" baseTableName="TeamRequest" constraintName="TeamRequest_collectionID_fkey" deferrable="false" initiallyDeferred="false" onDelete="CASCADE" onUpdate="CASCADE" referencedColumnNames="id" referencedTableName="TeamCollection" validate="true"/>
+    </changeSet>
+    <changeSet author="scott (generated)" id="1706687599755-39">
+        <addForeignKeyConstraint baseColumnNames="teamID" baseTableName="TeamRequest" constraintName="TeamRequest_teamID_fkey" deferrable="false" initiallyDeferred="false" onDelete="CASCADE" onUpdate="CASCADE" referencedColumnNames="id" referencedTableName="Team" validate="true"/>
+    </changeSet>
+    <changeSet author="scott (generated)" id="1706687599755-40">
+        <addForeignKeyConstraint baseColumnNames="parentID" baseTableName="UserCollection" constraintName="UserCollection_parentID_fkey" deferrable="false" initiallyDeferred="false" onDelete="CASCADE" onUpdate="CASCADE" referencedColumnNames="id" referencedTableName="UserCollection" validate="true"/>
+    </changeSet>
+    <changeSet author="scott (generated)" id="1706687599755-41">
+        <addForeignKeyConstraint baseColumnNames="userUid" baseTableName="UserCollection" constraintName="UserCollection_userUid_fkey" deferrable="false" initiallyDeferred="false" onDelete="CASCADE" onUpdate="CASCADE" referencedColumnNames="uid" referencedTableName="User" validate="true"/>
+    </changeSet>
+    <changeSet author="scott (generated)" id="1706687599755-42">
+        <addForeignKeyConstraint baseColumnNames="userUid" baseTableName="UserEnvironment" constraintName="UserEnvironment_userUid_fkey" deferrable="false" initiallyDeferred="false" onDelete="CASCADE" onUpdate="CASCADE" referencedColumnNames="uid" referencedTableName="User" validate="true"/>
+    </changeSet>
+    <changeSet author="scott (generated)" id="1706687599755-43">
+        <addForeignKeyConstraint baseColumnNames="userUid" baseTableName="UserHistory" constraintName="UserHistory_userUid_fkey" deferrable="false" initiallyDeferred="false" onDelete="CASCADE" onUpdate="CASCADE" referencedColumnNames="uid" referencedTableName="User" validate="true"/>
+    </changeSet>
+    <changeSet author="scott (generated)" id="1706687599755-44">
+        <addForeignKeyConstraint baseColumnNames="collectionID" baseTableName="UserRequest" constraintName="UserRequest_collectionID_fkey" deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" onUpdate="CASCADE" referencedColumnNames="id" referencedTableName="UserCollection" validate="true"/>
+    </changeSet>
+    <changeSet author="scott (generated)" id="1706687599755-45">
+        <addForeignKeyConstraint baseColumnNames="userUid" baseTableName="UserRequest" constraintName="UserRequest_userUid_fkey" deferrable="false" initiallyDeferred="false" onDelete="CASCADE" onUpdate="CASCADE" referencedColumnNames="uid" referencedTableName="User" validate="true"/>
+    </changeSet>
+    <changeSet author="scott (generated)" id="1706687599755-46">
+        <addForeignKeyConstraint baseColumnNames="userUid" baseTableName="UserSettings" constraintName="UserSettings_userUid_fkey" deferrable="false" initiallyDeferred="false" onDelete="CASCADE" onUpdate="CASCADE" referencedColumnNames="uid" referencedTableName="User" validate="true"/>
+    </changeSet>
+    <changeSet author="scott (generated)" id="1706687599755-47">
+        <addForeignKeyConstraint baseColumnNames="userUid" baseTableName="VerificationToken" constraintName="VerificationToken_userUid_fkey" deferrable="false" initiallyDeferred="false" onDelete="CASCADE" onUpdate="CASCADE" referencedColumnNames="uid" referencedTableName="User" validate="true"/>
+    </changeSet>
+</databaseChangeLog>

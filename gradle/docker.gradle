@@ -1,0 +1,24 @@
+apply plugin: "com.bmuschko.docker-spring-boot-application"
+ext {
+    env = System.getProperty("env", "prod");
+    minMem = System.getProperty("minMem", "512m");
+    maxMem = System.getProperty("maxMem", "2g");
+    language = System.getProperty("language", "zh");
+    country = System.getProperty("country", "CN");
+}
+docker {
+    springBootApplication {
+        baseImage = "openjdk:8-alpine"
+        maintainer = "Scott Lau 'exceedego@126.com'"
+        images = ["${project.group}/${project.name}:${project.version}", "${project.group}/${project.name}:latest"]
+        jvmArgs = [
+            "-Xms${minMem}"
+            , "-Xmx${maxMem}"
+            , "-Duser.language=${language}"
+            , "-Duser.country=${country}"
+            , "-Dspring.profiles.active=${env}"
+            , "-Dspring.config.additional-location=optional:/config/"
+        ]
+        ports = [project.ext.serverPort]
+    }
+}

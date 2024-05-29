@@ -1,0 +1,7 @@
+include "atp-server"
+
+rootProject.name = 'atp-backend'
+
+rootProject.children.each { project ->
+	project.buildFileName = "${project.name}.gradle"
+}

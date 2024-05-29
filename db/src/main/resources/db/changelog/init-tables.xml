@@ -1,0 +1,528 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+  <changeSet author="scott" id="20240204001-1">
+    <createTable tableName="account" remarks="账户表">
+      <column name="id" type="varchar(36)" remarks="ID">
+        <constraints nullable="false" primaryKey="true" primaryKeyName="account_pkey"/>
+      </column>
+      <column name="user_id" type="varchar(36)" remarks="用户ID">
+        <constraints nullable="false"/>
+      </column>
+      <column name="provider" type="varchar(64)" remarks="提供方">
+        <constraints nullable="false"/>
+      </column>
+      <column name="provider_account_id" type="varchar(128)" remarks="提供方账户ID">
+        <constraints nullable="false"/>
+      </column>
+      <column name="provider_refresh_token" type="varchar(512)" remarks="提供方刷新令牌"/>
+      <column name="provider_access_token" type="varchar(512)" remarks="提供方访问令牌"/>
+      <column name="provider_scope" type="varchar(512)" remarks="提供方范围"/>
+      <column name="logged_in" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP" remarks="登录时间">
+        <constraints nullable="false"/>
+      </column>
+      <column defaultValueNumeric="0" name="deleted" type="INT" remarks="是否已删除：0-否；1-是">
+        <constraints nullable="false"/>
+      </column>
+      <column defaultValueComputed="CURRENT_TIMESTAMP" name="create_time" type="datetime" remarks="创建时间">
+        <constraints nullable="false"/>
+      </column>
+      <column defaultValueComputed="CURRENT_TIMESTAMP" name="update_time" type="datetime" remarks="更新时间">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+  </changeSet>
+  <changeSet author="scott" id="20240204001-2">
+    <createIndex indexName="account_provider_provider_account_id_key" tableName="account" unique="true">
+      <column name="provider"/>
+      <column name="provider_account_id"/>
+    </createIndex>
+  </changeSet>
+  <changeSet author="scott" id="20240204001-3">
+    <createTable tableName="infra_config" remarks="基础配置表">
+      <column name="id" type="varchar(36)" remarks="ID">
+        <constraints nullable="false" primaryKey="true" primaryKeyName="infra_config_pkey"/>
+      </column>
+      <column name="name" type="varchar(256)" remarks="名称">
+        <constraints nullable="false"/>
+      </column>
+      <column name="value" type="varchar(1024)" remarks="值"/>
+      <column name="active" type="INT" defaultValueBoolean="true" remarks="是否启用：0-否；1-是">
+        <constraints nullable="false"/>
+      </column>
+      <column defaultValueNumeric="0" name="deleted" type="INT" remarks="是否已删除：0-否；1-是">
+        <constraints nullable="false"/>
+      </column>
+      <column defaultValueComputed="CURRENT_TIMESTAMP" name="create_time" type="datetime" remarks="创建时间">
+        <constraints nullable="false"/>
+      </column>
+      <column defaultValueComputed="CURRENT_TIMESTAMP" name="update_time" type="datetime" remarks="更新时间">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+  </changeSet>
+  <changeSet author="scott" id="20240204001-4">
+    <createIndex indexName="infra_config_name_key" tableName="infra_config" unique="true">
+      <column name="name"/>
+    </createIndex>
+  </changeSet>
+  <changeSet author="scott" id="20240204001-5">
+    <createTable tableName="invited_users" remarks="受邀用户表">
+      <column name="id" type="varchar(36)" remarks="ID">
+        <constraints nullable="false" primaryKey="true" primaryKeyName="invited_users_pkey"/>
+      </column>
+      <column name="admin_uid" type="varchar(36)" remarks="管理员用户ID">
+        <constraints nullable="false"/>
+      </column>
+      <column name="admin_email" type="varchar(128)" remarks="管理员邮箱">
+        <constraints nullable="false"/>
+      </column>
+      <column name="invitee_email" type="varchar(128)" remarks="受邀人邮箱">
+        <constraints nullable="false"/>
+      </column>
+      <column name="invited_on" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP" remarks="受邀时间">
+        <constraints nullable="false"/>
+      </column>
+      <column defaultValueNumeric="0" name="deleted" type="INT" remarks="是否已删除：0-否；1-是">
+        <constraints nullable="false"/>
+      </column>
+      <column defaultValueComputed="CURRENT_TIMESTAMP" name="create_time" type="datetime" remarks="创建时间">
+        <constraints nullable="false"/>
+      </column>
+      <column defaultValueComputed="CURRENT_TIMESTAMP" name="update_time" type="datetime" remarks="更新时间">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+  </changeSet>
+  <changeSet author="scott" id="20240204001-6">
+    <createIndex indexName="invited_users_invitee_email_key" tableName="invited_users" unique="true">
+      <column name="invitee_email"/>
+    </createIndex>
+  </changeSet>
+  <changeSet author="scott" id="20240204001-7">
+    <createTable tableName="shortcode" remarks="简码表">
+      <column name="id" type="varchar(36)" remarks="ID">
+        <constraints nullable="false" primaryKey="true" primaryKeyName="shortcode_pkey"/>
+      </column>
+      <column name="request" type="JSON" remarks="请求">
+        <constraints nullable="false"/>
+      </column>
+      <column name="creator_uid" type="varchar(36)" remarks="创建人用户ID"/>
+      <column name="embed_properties" type="JSON" remarks="嵌入的属性集"/>
+      <column defaultValueNumeric="0" name="deleted" type="INT" remarks="是否已删除：0-否；1-是">
+        <constraints nullable="false"/>
+      </column>
+      <column defaultValueComputed="CURRENT_TIMESTAMP" name="create_time" type="datetime" remarks="创建时间">
+        <constraints nullable="false"/>
+      </column>
+      <column defaultValueComputed="CURRENT_TIMESTAMP" name="update_time" type="datetime" remarks="更新时间">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+  </changeSet>
+  <changeSet author="scott" id="20240204001-8">
+    <createIndex indexName="shortcode_id_creator_uid_key" tableName="shortcode" unique="true">
+      <column name="id"/>
+      <column name="creator_uid"/>
+    </createIndex>
+  </changeSet>
+  <changeSet author="scott" id="20240204001-9">
+    <createTable tableName="team" remarks="团队表">
+      <column name="id" type="varchar(36)" remarks="ID">
+        <constraints nullable="false" primaryKey="true" primaryKeyName="team_pkey"/>
+      </column>
+      <column name="name" type="varchar(256)" remarks="名称">
+        <constraints nullable="false"/>
+      </column>
+      <column defaultValueNumeric="0" name="deleted" type="INT" remarks="是否已删除：0-否；1-是">
+        <constraints nullable="false"/>
+      </column>
+      <column defaultValueComputed="CURRENT_TIMESTAMP" name="create_time" type="datetime" remarks="创建时间">
+        <constraints nullable="false"/>
+      </column>
+      <column defaultValueComputed="CURRENT_TIMESTAMP" name="update_time" type="datetime" remarks="更新时间">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+  </changeSet>
+  <changeSet author="scott" id="20240204001-10">
+    <createTable tableName="team_collection" remarks="团队集合表">
+      <column name="id" type="varchar(36)" remarks="ID">
+        <constraints nullable="false" primaryKey="true" primaryKeyName="team_collection_pkey"/>
+      </column>
+      <column name="parent_id" type="varchar(36)" remarks="父集合ID"/>
+      <column name="team_id" type="varchar(36)" remarks="团队ID">
+        <constraints nullable="false"/>
+      </column>
+      <column name="title" type="varchar(512)" remarks="标题">
+        <constraints nullable="false"/>
+      </column>
+      <column name="order_index" type="INTEGER" remarks="排序">
+        <constraints nullable="false"/>
+      </column>
+      <column name="data" type="JSON" remarks="数据"/>
+      <column defaultValueNumeric="0" name="deleted" type="INT" remarks="是否已删除：0-否；1-是">
+        <constraints nullable="false"/>
+      </column>
+      <column defaultValueComputed="CURRENT_TIMESTAMP" name="create_time" type="datetime" remarks="创建时间">
+        <constraints nullable="false"/>
+      </column>
+      <column defaultValueComputed="CURRENT_TIMESTAMP" name="update_time" type="datetime" remarks="更新时间">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+  </changeSet>
+  <changeSet author="scott" id="20240204001-11">
+    <createTable tableName="team_environment" remarks="团队环境表">
+      <column name="id" type="varchar(36)" remarks="ID">
+        <constraints nullable="false" primaryKey="true" primaryKeyName="team_environment_pkey"/>
+      </column>
+      <column name="team_id" type="varchar(36)" remarks="团队ID">
+        <constraints nullable="false"/>
+      </column>
+      <column name="name" type="varchar(256)" remarks="名称">
+        <constraints nullable="false"/>
+      </column>
+      <column name="variables" type="JSON" remarks="变量集">
+        <constraints nullable="false"/>
+      </column>
+      <column defaultValueNumeric="0" name="deleted" type="INT" remarks="是否已删除：0-否；1-是">
+        <constraints nullable="false"/>
+      </column>
+      <column defaultValueComputed="CURRENT_TIMESTAMP" name="create_time" type="datetime" remarks="创建时间">
+        <constraints nullable="false"/>
+      </column>
+      <column defaultValueComputed="CURRENT_TIMESTAMP" name="update_time" type="datetime" remarks="更新时间">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+  </changeSet>
+  <changeSet author="scott" id="20240204001-12">
+    <createTable tableName="team_invitation" remarks="团队邀请表">
+      <column name="id" type="varchar(36)" remarks="ID">
+        <constraints nullable="false" primaryKey="true" primaryKeyName="team_invitation_pkey"/>
+      </column>
+      <column name="team_id" type="varchar(36)" remarks="团队ID">
+        <constraints nullable="false"/>
+      </column>
+      <column name="creator_uid" type="varchar(36)" remarks="创建人用户ID">
+        <constraints nullable="false"/>
+      </column>
+      <column name="invitee_email" type="varchar(128)" remarks="受邀人邮箱">
+        <constraints nullable="false"/>
+      </column>
+      <column name="invitee_role" type="enum('OWNER', 'VIEWER', 'EDITOR')" remarks="受邀人角色">
+        <constraints nullable="false"/>
+      </column>
+      <column defaultValueNumeric="0" name="deleted" type="INT" remarks="是否已删除：0-否；1-是">
+        <constraints nullable="false"/>
+      </column>
+      <column defaultValueComputed="CURRENT_TIMESTAMP" name="create_time" type="datetime" remarks="创建时间">
+        <constraints nullable="false"/>
+      </column>
+      <column defaultValueComputed="CURRENT_TIMESTAMP" name="update_time" type="datetime" remarks="更新时间">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+  </changeSet>
+  <changeSet author="scott" id="20240204001-13">
+    <createIndex indexName="team_invitation_team_id_idx" tableName="team_invitation">
+      <column name="team_id"/>
+    </createIndex>
+  </changeSet>
+  <changeSet author="scott" id="20240204001-14">
+    <createIndex indexName="team_invitation_team_id_invitee_email_key" tableName="team_invitation" unique="true">
+      <column name="team_id"/>
+      <column name="invitee_email"/>
+    </createIndex>
+  </changeSet>
+  <changeSet author="scott" id="20240204001-15">
+    <createTable tableName="team_member" remarks="团队成员表">
+      <column name="id" type="varchar(36)" remarks="ID">
+        <constraints nullable="false" primaryKey="true" primaryKeyName="team_member_pkey"/>
+      </column>
+      <column name="role" type="enum('OWNER', 'VIEWER', 'EDITOR')" remarks="角色">
+        <constraints nullable="false"/>
+      </column>
+      <column name="user_id" type="varchar(36)" remarks="用户ID">
+        <constraints nullable="false"/>
+      </column>
+      <column name="team_id" type="varchar(36)" remarks="团队ID">
+        <constraints nullable="false"/>
+      </column>
+      <column defaultValueNumeric="0" name="deleted" type="INT" remarks="是否已删除：0-否；1-是">
+        <constraints nullable="false"/>
+      </column>
+      <column defaultValueComputed="CURRENT_TIMESTAMP" name="create_time" type="datetime" remarks="创建时间">
+        <constraints nullable="false"/>
+      </column>
+      <column defaultValueComputed="CURRENT_TIMESTAMP" name="update_time" type="datetime" remarks="更新时间">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+  </changeSet>
+  <changeSet author="scott" id="20240204001-16">
+    <createIndex indexName="team_member_team_id_user_id_key" tableName="team_member" unique="true">
+      <column name="team_id"/>
+      <column name="user_id"/>
+    </createIndex>
+  </changeSet>
+  <changeSet author="scott" id="20240204001-17">
+    <createTable tableName="team_request" remarks="团队请求表">
+      <column name="id" type="varchar(36)" remarks="ID">
+        <constraints nullable="false" primaryKey="true" primaryKeyName="team_request_pkey"/>
+      </column>
+      <column name="collection_id" type="varchar(36)" remarks="集合ID">
+        <constraints nullable="false"/>
+      </column>
+      <column name="team_id" type="varchar(36)" remarks="团队ID">
+        <constraints nullable="false"/>
+      </column>
+      <column name="title" type="varchar(512)" remarks="标题">
+        <constraints nullable="false"/>
+      </column>
+      <column name="request" type="JSON" remarks="请求">
+        <constraints nullable="false"/>
+      </column>
+      <column name="order_index" type="INTEGER" remarks="排序">
+        <constraints nullable="false"/>
+      </column>
+      <column defaultValueNumeric="0" name="deleted" type="INT" remarks="是否已删除：0-否；1-是">
+        <constraints nullable="false"/>
+      </column>
+      <column defaultValueComputed="CURRENT_TIMESTAMP" name="create_time" type="datetime" remarks="创建时间">
+        <constraints nullable="false"/>
+      </column>
+      <column defaultValueComputed="CURRENT_TIMESTAMP" name="update_time" type="datetime" remarks="更新时间">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+  </changeSet>
+  <changeSet author="scott" id="20240204001-18">
+    <createTable tableName="user" remarks="用户表">
+      <column name="id" type="varchar(36)" remarks="ID">
+        <constraints nullable="false" primaryKey="true" primaryKeyName="user_pkey"/>
+      </column>
+      <column name="email" type="varchar(128)" remarks="邮箱">
+        <constraints nullable="false"/>
+      </column>
+      <column name="password" type="VARCHAR(64)" remarks="密码">
+        <constraints nullable="false"/>
+      </column>
+      <column name="display_name" type="varchar(256)" remarks="显示名称"/>
+      <column name="photo_url" type="varchar(1024)" remarks="头像链接"/>
+      <column name="is_admin" type="INT" defaultValueBoolean="false" remarks="是否管理员：0-否；1-是">
+        <constraints nullable="false"/>
+      </column>
+      <column name="refresh_token" type="varchar(512)" remarks="刷新令牌"/>
+      <column name="current_rest_session" type="JSON" remarks="当前REST会话"/>
+      <column name="current_gql_session" type="JSON" remarks="当前GQL会话"/>
+      <column defaultValueNumeric="0" name="deleted" type="INT" remarks="是否已删除：0-否；1-是">
+        <constraints nullable="false"/>
+      </column>
+      <column defaultValueComputed="CURRENT_TIMESTAMP" name="create_time" type="datetime" remarks="创建时间">
+        <constraints nullable="false"/>
+      </column>
+      <column defaultValueComputed="CURRENT_TIMESTAMP" name="update_time" type="datetime" remarks="更新时间">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+  </changeSet>
+  <changeSet author="scott" id="20240204001-19">
+    <createIndex indexName="user_email_key" tableName="user" unique="true">
+      <column name="email"/>
+    </createIndex>
+  </changeSet>
+  <changeSet author="scott" id="20240204001-20">
+    <createTable tableName="user_collection" remarks="用户集合表">
+      <column name="id" type="varchar(36)" remarks="ID">
+        <constraints nullable="false" primaryKey="true" primaryKeyName="user_collection_pkey"/>
+      </column>
+      <column name="parent_id" type="varchar(36)" remarks="父集合ID"/>
+      <column name="user_id" type="varchar(36)" remarks="用户ID">
+        <constraints nullable="false"/>
+      </column>
+      <column name="title" type="varchar(512)" remarks="标题">
+        <constraints nullable="false"/>
+      </column>
+      <column name="order_index" type="INTEGER" remarks="排序">
+        <constraints nullable="false"/>
+      </column>
+      <column name="type" type="enum('REST', 'GQL')" remarks="请求类型">
+        <constraints nullable="false"/>
+      </column>
+      <column name="data" type="JSON" remarks="数据"/>
+      <column defaultValueNumeric="0" name="deleted" type="INT" remarks="是否已删除：0-否；1-是">
+        <constraints nullable="false"/>
+      </column>
+      <column defaultValueComputed="CURRENT_TIMESTAMP" name="create_time" type="datetime" remarks="创建时间">
+        <constraints nullable="false"/>
+      </column>
+      <column defaultValueComputed="CURRENT_TIMESTAMP" name="update_time" type="datetime" remarks="更新时间">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+  </changeSet>
+  <changeSet author="scott" id="20240204001-21">
+    <createTable tableName="user_environment" remarks="用户环境表">
+      <column name="id" type="varchar(36)" remarks="ID">
+        <constraints nullable="false" primaryKey="true" primaryKeyName="user_environment_pkey"/>
+      </column>
+      <column name="user_id" type="varchar(36)" remarks="用户ID">
+        <constraints nullable="false"/>
+      </column>
+      <column name="name" type="varchar(256)" remarks="名称"/>
+      <column name="variables" type="JSON" remarks="变量集">
+        <constraints nullable="false"/>
+      </column>
+      <column name="is_global" type="INT" remarks="是否全局：0-否；1-是">
+        <constraints nullable="false"/>
+      </column>
+      <column defaultValueNumeric="0" name="deleted" type="INT" remarks="是否已删除：0-否；1-是">
+        <constraints nullable="false"/>
+      </column>
+      <column defaultValueComputed="CURRENT_TIMESTAMP" name="create_time" type="datetime" remarks="创建时间">
+        <constraints nullable="false"/>
+      </column>
+      <column defaultValueComputed="CURRENT_TIMESTAMP" name="update_time" type="datetime" remarks="更新时间">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+  </changeSet>
+  <changeSet author="scott" id="20240204001-22">
+    <createTable tableName="user_history" remarks="用户历史表">
+      <column name="id" type="varchar(36)" remarks="ID">
+        <constraints nullable="false" primaryKey="true" primaryKeyName="user_history_pkey"/>
+      </column>
+      <column name="user_id" type="varchar(36)" remarks="用户ID">
+        <constraints nullable="false"/>
+      </column>
+      <column name="req_type" type="enum('REST', 'GQL')" remarks="请求类型">
+        <constraints nullable="false"/>
+      </column>
+      <column name="request" type="JSON" remarks="请求">
+        <constraints nullable="false"/>
+      </column>
+      <column name="response_metadata" type="JSON" remarks="响应元数据">
+        <constraints nullable="false"/>
+      </column>
+      <column name="is_starred" type="INT" remarks="是否星标：0-否；1-是">
+        <constraints nullable="false"/>
+      </column>
+      <column name="executed_on" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP" remarks="执行时间">
+        <constraints nullable="false"/>
+      </column>
+      <column defaultValueNumeric="0" name="deleted" type="INT" remarks="是否已删除：0-否；1-是">
+        <constraints nullable="false"/>
+      </column>
+      <column defaultValueComputed="CURRENT_TIMESTAMP" name="create_time" type="datetime" remarks="创建时间">
+        <constraints nullable="false"/>
+      </column>
+      <column defaultValueComputed="CURRENT_TIMESTAMP" name="update_time" type="datetime" remarks="更新时间">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+  </changeSet>
+  <changeSet author="scott" id="20240204001-23">
+    <createTable tableName="user_request" remarks="用户请求表">
+      <column name="id" type="varchar(36)" remarks="ID">
+        <constraints nullable="false" primaryKey="true" primaryKeyName="user_request_pkey"/>
+      </column>
+      <column name="collection_id" type="varchar(36)" remarks="集合ID">
+        <constraints nullable="false"/>
+      </column>
+      <column name="user_id" type="varchar(36)" remarks="用户ID">
+        <constraints nullable="false"/>
+      </column>
+      <column name="title" type="varchar(512)" remarks="标题">
+        <constraints nullable="false"/>
+      </column>
+      <column name="request" type="JSON" remarks="请求">
+        <constraints nullable="false"/>
+      </column>
+      <column name="type" type="enum('REST', 'GQL')" remarks="请求类型">
+        <constraints nullable="false"/>
+      </column>
+      <column name="order_index" type="INTEGER" remarks="排序">
+        <constraints nullable="false"/>
+      </column>
+      <column defaultValueNumeric="0" name="deleted" type="INT" remarks="是否已删除：0-否；1-是">
+        <constraints nullable="false"/>
+      </column>
+      <column defaultValueComputed="CURRENT_TIMESTAMP" name="create_time" type="datetime" remarks="创建时间">
+        <constraints nullable="false"/>
+      </column>
+      <column defaultValueComputed="CURRENT_TIMESTAMP" name="update_time" type="datetime" remarks="更新时间">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+  </changeSet>
+  <changeSet author="scott" id="20240204001-24">
+    <createTable tableName="user_settings" remarks="用户设置表">
+      <column name="id" type="varchar(36)" remarks="ID">
+        <constraints nullable="false" primaryKey="true" primaryKeyName="user_settings_pkey"/>
+      </column>
+      <column name="user_id" type="varchar(36)" remarks="用户ID">
+        <constraints nullable="false"/>
+      </column>
+      <column name="properties" type="JSON" remarks="属性集">
+        <constraints nullable="false"/>
+      </column>
+      <column defaultValueNumeric="0" name="deleted" type="INT" remarks="是否已删除：0-否；1-是">
+        <constraints nullable="false"/>
+      </column>
+      <column defaultValueComputed="CURRENT_TIMESTAMP" name="create_time" type="datetime" remarks="创建时间">
+        <constraints nullable="false"/>
+      </column>
+      <column defaultValueComputed="CURRENT_TIMESTAMP" name="update_time" type="datetime" remarks="更新时间">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+  </changeSet>
+  <changeSet author="scott" id="20240204001-25">
+    <createIndex indexName="user_settings_user_id_key" tableName="user_settings" unique="true">
+      <column name="user_id"/>
+    </createIndex>
+  </changeSet>
+  <changeSet author="scott" id="20240204001-26">
+    <createTable tableName="verification_token" remarks="验证码表">
+      <column name="id" type="varchar(36)" remarks="ID">
+        <constraints nullable="false" primaryKey="true" primaryKeyName="verification_token_pkey"/>
+      </column>
+      <column name="device_identifier" type="varchar(64)" remarks="设备标识">
+        <constraints nullable="false"/>
+      </column>
+      <column name="token" type="varchar(64)" remarks="令牌">
+        <constraints nullable="false"/>
+      </column>
+      <column name="user_id" type="varchar(36)" remarks="用户ID">
+        <constraints nullable="false"/>
+      </column>
+      <column name="expires_on" type="DATETIME" remarks="过期时间">
+        <constraints nullable="false"/>
+      </column>
+      <column defaultValueNumeric="0" name="deleted" type="INT" remarks="是否已删除：0-否；1-是">
+        <constraints nullable="false"/>
+      </column>
+      <column defaultValueComputed="CURRENT_TIMESTAMP" name="create_time" type="datetime" remarks="创建时间">
+        <constraints nullable="false"/>
+      </column>
+      <column defaultValueComputed="CURRENT_TIMESTAMP" name="update_time" type="datetime" remarks="更新时间">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+  </changeSet>
+  <changeSet author="scott" id="20240204001-27">
+    <createIndex indexName="verification_token_token_key" tableName="verification_token" unique="true">
+      <column name="token"/>
+    </createIndex>
+  </changeSet>
+  <changeSet author="scott" id="20240204001-28">
+    <createIndex indexName="verification_token_device_identifier_token_key" tableName="verification_token"
+                 unique="true">
+      <column name="device_identifier"/>
+      <column name="token"/>
+    </createIndex>
+  </changeSet>
+</databaseChangeLog>

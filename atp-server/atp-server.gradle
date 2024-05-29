@@ -1,0 +1,74 @@
+plugins {
+  id "com.netflix.dgs.codegen" version "${dgsCodegenVersion}"
+}
+
+//generateJava {
+//  // List of directories containing schema files
+//  schemaPaths = ["${projectDir}/src/main/resources/schema"]
+//  // The package name to use to generate sources
+//  packageName = 'com.soulcraft.hoppscotch.server.gql.generated'
+//  // the directory to put generated sources
+//  generatedSourcesDir = "${projectDir}/src/dgs"
+//  // Always use boxed types for primitives
+//  generateBoxedTypes = true
+//}
+
+project.description = "Atp Server"
+
+project.ext {
+  serverPort = 3170
+}
+
+dependencyManagement {
+  imports {
+    mavenBom("com.netflix.graphql.dgs:graphql-dgs-platform-dependencies:${dgsVersion}")
+  }
+}
+
+dependencies {
+  // graphql dgs
+  implementation(platform("com.netflix.graphql.dgs:graphql-dgs-platform-dependencies:${dgsVersion}"))
+  implementation("com.netflix.graphql.dgs:graphql-dgs-spring-boot-starter")
+  implementation("com.netflix.graphql.dgs:graphql-dgs-extended-scalars")
+  implementation("com.netflix.graphql.dgs:graphql-dgs-subscriptions-websockets-autoconfigure")
+  implementation("com.netflix.graphql.dgs:graphql-dgs-spring-boot-micrometer")
+  // spring framework
+  implementation("org.springframework.boot:spring-boot-starter-web")
+  implementation("org.springframework.boot:spring-boot-starter-security")
+  implementation("org.springframework.boot:spring-boot-starter-actuator")
+  implementation "org.springframework.boot:spring-boot-starter-validation"
+  implementation "org.springframework.boot:spring-boot-starter-thymeleaf"
+
+//  implementation("net.datafaker:datafaker:2.+")
+//  implementation("com.github.ben-manes.caffeine:caffeine")
+
+  // swagger
+  implementation "io.springfox:springfox-boot-starter:${springfoxVersion}"
+  // jwt
+  implementation "io.jsonwebtoken:jjwt:${jjwtVersion}"
+  // hutool
+  implementation "cn.hutool:hutool-all:${hutoolVersion}"
+  // email
+  implementation "com.soulcraft.utils.email:email-sender:${emailSenderVersion}"
+  implementation "javax.mail:mail:${mailVersion}"
+  // error-handler
+  implementation("com.soulcraft:response-and-error-handler:${scResponseVersion}")
+  // druid
+  implementation "com.alibaba:druid-spring-boot-starter:${druidVersion}"
+  // mybatis-plus
+  implementation "com.baomidou:mybatis-plus-boot-starter:${mybatisPlusVersion}"
+  // mybatis-common
+  implementation("com.soulcraft:mybatis-common:${scMybatisCommonVersion}")
+
+  implementation 'org.springframework.boot:spring-boot-starter-websocket'
+  implementation 'com.netflix.graphql.dgs:graphql-dgs-webflux-starter'
+
+  // mysql driver
+  runtimeOnly "mysql:mysql-connector-java:${mysqlDriverVersion}"
+
+  testImplementation("org.springframework.boot:spring-boot-starter-test")
+  testImplementation("org.springframework.boot:spring-boot-starter-webflux")
+  testImplementation("org.springframework.security:spring-security-test")
+  testImplementation("com.netflix.graphql.dgs:graphql-dgs-client")
+  testImplementation("io.projectreactor:reactor-test")
+}
