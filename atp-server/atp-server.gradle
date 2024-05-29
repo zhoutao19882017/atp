@@ -6,7 +6,7 @@ plugins {
 //  // List of directories containing schema files
 //  schemaPaths = ["${projectDir}/src/main/resources/schema"]
 //  // The package name to use to generate sources
-//  packageName = 'com.soulcraft.hoppscotch.server.gql.generated'
+//  packageName = 'com.bcs.atp.server.gql.generated'
 //  // the directory to put generated sources
 //  generatedSourcesDir = "${projectDir}/src/dgs"
 //  // Always use boxed types for primitives
