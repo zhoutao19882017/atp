@@ -87,7 +87,6 @@ secure:
       - /druid/**
       - /graphiql
       - /graphql
-#      - /websocket
 #      - /subscriptions
       - /ping
       - /v1/auth/providers
