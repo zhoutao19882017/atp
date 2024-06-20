@@ -1,8 +1,9 @@
 package com.bcs.atp.server.service;
 
-import com.bcs.atp.server.model.UserRequestModel;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.bcs.atp.server.gql.types.UserRequest;
+import com.bcs.atp.server.model.UserRequestModel;
 import com.bcs.atp.server.model.qo.UserRequestPageQo;
 
 import java.util.List;
@@ -64,4 +65,12 @@ public interface UserRequestService extends IService<UserRequestModel> {
    * @return 所有对象
    */
   List<UserRequestModel> listAll();
+
+  /**
+   * 将数据库对象转换为graphql对象
+   *
+   * @param dbModel 数据库对象
+   * @return graphql对象
+   */
+  UserRequest convertDbModelToGraphqlModel(UserRequestModel dbModel);
 }

@@ -2,16 +2,18 @@ package com.bcs.atp.server.gql.mutations;
 
 import cn.hutool.core.bean.BeanUtil;
 import com.bcs.atp.server.gql.types.ReqType;
+import com.bcs.atp.server.gql.types.UserHistory;
+import com.bcs.atp.server.model.UserHistoryModel;
+import com.bcs.atp.server.model.user.UserDetails;
+import com.bcs.atp.server.service.UserHistoryService;
 import com.netflix.graphql.dgs.DgsComponent;
 import com.netflix.graphql.dgs.DgsMutation;
 import com.netflix.graphql.dgs.InputArgument;
-import com.bcs.atp.server.constant.UserConstant;
-import com.bcs.atp.server.gql.types.UserHistory;
-import com.bcs.atp.server.model.UserHistoryModel;
-import com.bcs.atp.server.service.UserHistoryService;
 import com.soulcraft.mybatis.common.enums.EYesOrNo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 @Slf4j
 @DgsComponent
@@ -191,8 +193,25 @@ public class RequestAdminMutations {
 
     @DgsMutation
     public UserHistory createUserHistory(@InputArgument String reqData, @InputArgument String resMetadata, ReqType reqType){
+        String userId = "";
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null) {
+            Object principal = authentication.getPrincipal();
+            if (principal instanceof UserDetails) {
+                UserDetails userDetails = (UserDetails) principal;
+                userId = userDetails.getUserId();
+            }
+        }
+        // 第二种，通过DgsDataFetchingEnvironment入参获取用户信息
+//        DgsWebMvcRequestData requestData = (DgsWebMvcRequestData) dgsEnv.getDgsContext().getRequestData();
+//        ServletWebRequest webRequest = (ServletWebRequest) requestData.getWebRequest();
+//        String userEmail = webRequest.getUserPrincipal().getName();
+//        if (userEmail != null) {
+//            userId = userService.lambdaQuery().eq(UserModel::getEmail, userEmail).one().getId();
+//        }
+
         UserHistoryModel userHistoryModel = UserHistoryModel.builder()
-                .userId(UserConstant.ANONYMOUS_USER_ID)
+                .userId(userId)
                 .reqType(reqType.toString())
                 .request(reqData)
                 .responseMetadata(resMetadata)

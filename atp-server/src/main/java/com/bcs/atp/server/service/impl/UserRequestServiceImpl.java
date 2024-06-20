@@ -1,14 +1,16 @@
 package com.bcs.atp.server.service.impl;
 
-import com.bcs.atp.server.mapper.UserRequestMapper;
-import com.bcs.atp.server.model.UserRequestModel;
-import com.bcs.atp.server.service.UserRequestService;
+import cn.hutool.core.bean.BeanUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.bcs.atp.server.gql.types.UserRequest;
+import com.bcs.atp.server.mapper.UserRequestMapper;
+import com.bcs.atp.server.model.UserRequestModel;
 import com.bcs.atp.server.model.qo.UserRequestPageQo;
+import com.bcs.atp.server.service.UserRequestService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -50,5 +52,13 @@ public class UserRequestServiceImpl extends ServiceImpl<UserRequestMapper, UserR
     QueryWrapper<UserRequestModel> wrapper = new QueryWrapper<>();
     LambdaQueryWrapper<UserRequestModel> lambda = wrapper.lambda();
     return list(wrapper);
+  }
+
+  @Override
+  public UserRequest convertDbModelToGraphqlModel(UserRequestModel userRequestModel) {
+    UserRequest userRequest = new UserRequest();
+    BeanUtil.copyProperties(userRequestModel, userRequest);
+    // TODO
+    return userRequest;
   }
 }

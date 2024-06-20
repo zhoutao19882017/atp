@@ -1,8 +1,9 @@
 package com.bcs.atp.server.service;
 
-import com.bcs.atp.server.model.InfraConfigModel;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.bcs.atp.server.gql.types.ServiceStatus;
+import com.bcs.atp.server.model.InfraConfigModel;
 import com.bcs.atp.server.model.qo.InfraConfigPageQo;
 
 import java.util.List;
@@ -64,4 +65,25 @@ public interface InfraConfigService extends IService<InfraConfigModel> {
    * @return 所有对象
    */
   List<InfraConfigModel> listAll();
+
+  /**
+   * 按配置名查询
+   * @param name
+   * @return
+   */
+  InfraConfigModel queryByName(String name);
+
+  /**
+   * 数据收集分析配置修改
+   * @param status
+   * @return
+   */
+  boolean toggleAnalyticsCollection(ServiceStatus status);
+
+  /**
+   * 设置配置为已完成，数据库值为false
+   * @return
+   */
+  boolean setSetupAsComplete();
+
 }

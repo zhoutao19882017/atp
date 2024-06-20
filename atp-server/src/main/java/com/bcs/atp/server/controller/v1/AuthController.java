@@ -36,8 +36,12 @@ public class AuthController {
    * 默认的登录方式：Email
    */
   private static final AuthProvider DEFAULT_AUTH_PROVIDER = AuthProvider.EMAIL;
+
   @Value("${infra.auth.allowedAuthProviders}")
   private AuthProvider[] allowedAuthProviders;
+
+  @Value("${infra.auth.validAdminOrigin}")
+  private String validAdminOrigin;
 
   @Autowired
   private IAuthService authService;
@@ -49,13 +53,16 @@ public class AuthController {
   }
 
   @ApiOperation("用户登录")
-  @PostMapping("/signIn")
-  public R<DeviceIdentifierToken> signInWithMagicLink(@Validated @RequestBody SignInMagicDto dto,
-                                                      @RequestParam(required = false) String origin) {
+  @PostMapping("/signin")
+  public R<DeviceIdentifierToken> signInAdminWithMagicLink(@Validated @RequestBody SignInMagicDto dto, @RequestParam(required = false) String origin) {
     // 检查是不是系统支持的登录方式
     boolean authProviderCheck = AuthHelper.authProviderCheck(DEFAULT_AUTH_PROVIDER, allowedAuthProviders);
     ResponseEnum.AUTH_PROVIDER_NOT_SUPPORTED.assertTrue(authProviderCheck, DEFAULT_AUTH_PROVIDER);
-
+    // check to see if origin is valid
+    if (origin != null){
+      boolean originValidated = validAdminOrigin.equals(origin);
+      ResponseEnum.ORIGIN_NOT_VALID.assertTrue(originValidated, origin);
+    }
     // authService.signInMagicLink
     return R.success(authService.signInMagicLink(dto.getEmail(), origin));
   }
@@ -67,8 +74,8 @@ public class AuthController {
     return R.success(authService.verifyToken(dto));
   }
 
-  @ApiOperation("支持的登录方式列表")
-  @PostMapping("/logout")
+  @ApiOperation("用户登出")
+  @RequestMapping("/logout")
   public R<?> logout(HttpServletResponse response) {
     return R.success();
   }

@@ -65,10 +65,8 @@ public class AuthService implements IAuthService {
     boolean emailValidated = emailUtils.validateEmail(email);
     ResponseEnum.EMAIL_NOT_VALID.assertTrue(emailValidated, email);
 
-    // check to see if origin is valid
-
     // create user
-    UserModel user = userService.createUserViaMagicLink(email);
+    UserModel user = userService.createUserViaMagicLink(email, origin);
 
     // generateMagicLinkTokens(user)
     String deviceIdentifier = BCrypt.gensalt(tokenSaltComplexity);
@@ -85,7 +83,7 @@ public class AuthService implements IAuthService {
 
     // 发送登录/注册邮件
     try {
-      emailUtils.sendUserInvitationEmail(email, token);
+      emailUtils.sendUserInvitationEmail(email, token, origin);
     } catch (MailSendException e) {
       ResponseEnum.EMAIL_SEND_FAILED.throwNewException(email);
     }

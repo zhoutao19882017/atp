@@ -27,10 +27,14 @@ public class EmailUtils {
   private String emailPattern;
   @Value("${infra.auth.loginLinkPrefix}")
   private String loginLinkPrefix;
+  @Value("${infra.auth.adminLoginLinkPrefix}")
+  private String adminLoginLinkPrefix;
   @Value("${email.templates.userInvitation.fileName}")
   private String userInvitationFileName;
   @Value("${email.templates.userInvitation.subject}")
   private String userInvitationSubject;
+  @Value("${infra.auth.validAdminOrigin}")
+  private String validAdminOrigin;
   @Autowired
   private SpringTemplateEngine templateEngine;
 
@@ -50,21 +54,28 @@ public class EmailUtils {
    *
    * @param email 邮件收件人
    * @param token 登录令牌
+   * @param origin 来源
    * @throws MailSendException 发送邮件失败
    */
-  public void sendUserInvitationEmail(String email, String token) throws MailSendException {
-    log.info("email link is {}{}", loginLinkPrefix, token);
+  public void sendUserInvitationEmail(String email, String token, String origin) throws MailSendException {
     EmailInfo emailInfo = new EmailInfo();
     emailInfo.setSubject(userInvitationSubject);
     emailInfo.setReceivers(email);
-    String content = getUserInvitationEmailContent(email, token);
+    String content = "";
+    if (validAdminOrigin.equals(origin)){
+      log.info("email link is {}{}", adminLoginLinkPrefix, token);
+      content = getUserInvitationEmailContent(email, token, adminLoginLinkPrefix);
+    }else {
+      log.info("email link is {}{}", loginLinkPrefix, token);
+      content = getUserInvitationEmailContent(email, token, loginLinkPrefix);
+    }
     emailInfo.setHtmlContent(content);
     emailSenderUtils.sendEmail(emailInfo);
   }
 
-  private String getUserInvitationEmailContent(String email, String token) {
+  private String getUserInvitationEmailContent(String email, String token, String userLoginLinkPrefix) {
     Context ctx = new Context();
-    String magicLink = String.format("%s%s", loginLinkPrefix, token);
+    String magicLink = String.format("%s%s", userLoginLinkPrefix, token);
     ctx.setVariable("magicLink", magicLink);
     ctx.setVariable("inviteeEmail", email);
     return templateEngine.process(userInvitationFileName, ctx);

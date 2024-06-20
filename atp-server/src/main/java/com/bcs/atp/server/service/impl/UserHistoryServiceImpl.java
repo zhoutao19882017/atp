@@ -61,7 +61,7 @@ public class UserHistoryServiceImpl extends ServiceImpl<UserHistoryMapper, UserH
   @Override
   public UserHistory convertDbModelToGraphqlModel(UserHistoryModel dbModel) {
     UserHistory model = new UserHistory();
-    BeanUtil.copyProperties(dbModel, model);
+    BeanUtil.copyProperties(dbModel, model, "executedOn");
     model.setUserUid(dbModel.getUserId());
     model.setIsStarred(dbModel.getIsStarred().equals(EYesOrNo.YES));
     model.setReqType(ReqType.valueOf(dbModel.getReqType()));

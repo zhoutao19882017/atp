@@ -14,6 +14,8 @@ public enum ResponseEnum implements BusinessExceptionAssert {
   AUTH_PROVIDER_NOT_SUPPORTED(904, "Auth provider not supported."),
   EMAIL_NOT_VALID(905, "Email {0} not valid."),
   EMAIL_SEND_FAILED(906, "Failed to send email to {0}."),
+  ORIGIN_NOT_VALID(907, "Origin {0} not valid."),
+  INFRA_CONFIG_NOT_FOUND(404, "infra_config/not_found")
   ;
 
   /**

@@ -2,7 +2,8 @@
 <configuration>
 
   <property name="project.name" value="hoppscotch"/>
-  <property name="log.pattern" value="%d{yyyy-MM-dd HH:mm:ss.SSS} -%5p ${PID:-} [%15.15t] %-60.60C{1.} : %m%n"/>
+<!--  <property name="log.pattern" value="%d{yyyy-MM-dd HH:mm:ss.SSS} -%5p ${PID:-} [%15.15t] %-60.60C{1.} : %m%n"/>-->
+  <property name="log.pattern" value="%d{yyyy-MM-dd HH:mm:ss.SSS} -%5p ${PID:-} [%15.15t] %logger : %m%n"/>
   <property name="log.path" value="${user.dir}/logs/"/>
 
   <appender name="Console"

@@ -79,9 +79,10 @@ public interface UserService extends IService<UserModel> {
    * 从邮箱地址创建用户
    *
    * @param email 邮箱地址
+   * @param origin 来源
    * @return 创建的用户
    */
-  UserModel createUserViaMagicLink(String email);
+  UserModel createUserViaMagicLink(String email, String origin);
 
   /**
    * 将数据库对象转换为graphql对象

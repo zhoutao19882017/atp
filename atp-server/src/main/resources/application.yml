@@ -57,8 +57,12 @@ infra:
     loginLinkTokenValidity: 3
     # 登录链接前缀
     loginLinkPrefix: http://localhost:3000/enter?token=
+    # 管理员登录链接前缀
+    adminLoginLinkPrefix: http://localhost:3100/enter?token=
     # 用户默认密码
     defaultPassword: Atp@123
+    # 合法的管理用户源（请求参数）
+    validAdminOrigin: admin
 
 jwt:
   # JWT存储的请求头
@@ -87,12 +91,14 @@ secure:
       - /druid/**
       - /graphiql
       - /graphql
-#      - /subscriptions
+      - /subscriptions
       - /ping
       - /v1/auth/providers
       - /v1/auth/signIn
+      - /v1/auth/signin
       - /v1/auth/verify
       - /v1/auth/logout
+      - /v1/site/setup
       - /error
 
 email:

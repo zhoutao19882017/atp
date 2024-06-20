@@ -47,6 +47,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserModel> implemen
   private UserSettingsService userSettingsService;
   @Value("${infra.auth.defaultPassword}")
   private String defaultPassword;
+  @Value("${infra.auth.validAdminOrigin}")
+  private String validAdminOrigin;
   @Autowired
   private PasswordEncoder passwordEncoder;
   @Autowired
@@ -89,7 +91,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserModel> implemen
   }
 
   @Override
-  public UserModel createUserViaMagicLink(String email) {
+  public UserModel createUserViaMagicLink(String email, String origin) {
     QueryWrapper<UserModel> queryWrapper = new QueryWrapper<>();
     queryWrapper.lambda().eq(UserModel::getEmail, email);
     UserModel user = getOne(queryWrapper);
@@ -102,7 +104,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserModel> implemen
       .password(passwordEncoder.encode(defaultPassword))
       .displayName(email)
       .photoUrl("")
-      .isAdmin(EYesOrNo.NO)
+      .isAdmin(validAdminOrigin.equals(origin) ? EYesOrNo.YES : EYesOrNo.NO)
       .currentGqlSession(JSONUtil.toJsonStr(JSONUtil.createArray()))
       .currentRestSession(JSONUtil.toJsonStr(JSONUtil.createArray()))
       .build();
