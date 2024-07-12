@@ -1,6 +1,7 @@
 package com.bcs.atp.server.util;
 
 import com.bcs.atp.server.gql.types.AuthProvider;
+import io.micrometer.core.instrument.util.StringUtils;
 
 import java.util.Arrays;
 import java.util.stream.Collectors;
@@ -22,5 +23,12 @@ public class AuthHelper {
    */
   public static boolean authProviderCheck(AuthProvider authProvider, AuthProvider[] allowedAuthProviders) {
     return Arrays.stream(allowedAuthProviders).collect(Collectors.toSet()).contains(authProvider);
+  }
+
+  public static boolean passwordValidated(String password, String confirmPassword){
+    if (StringUtils.isBlank(password) || StringUtils.isBlank(confirmPassword)){
+      return false;
+    }
+    return password.equals(confirmPassword);
   }
 }

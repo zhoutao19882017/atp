@@ -1,9 +1,11 @@
 package com.bcs.atp.server.service;
 
-import com.bcs.atp.server.gql.types.User;
-import com.bcs.atp.server.model.UserModel;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.bcs.atp.server.gql.types.User;
+import com.bcs.atp.server.model.UserModel;
+import com.bcs.atp.server.model.dto.LoginDTO;
+import com.bcs.atp.server.model.dto.LoginResponseDTO;
 import com.bcs.atp.server.model.qo.UserPageQo;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -79,10 +81,21 @@ public interface UserService extends IService<UserModel> {
    * 从邮箱地址创建用户
    *
    * @param email 邮箱地址
+   * @param password 密码
    * @param origin 来源
    * @return 创建的用户
    */
-  UserModel createUserViaMagicLink(String email, String origin);
+  UserModel createUserViaMagicLink(String email, String password, String origin);
+
+  /**
+   * 创建用户
+   *
+   * @param email 邮箱地址
+   * @param password 密码
+   * @param origin 来源
+   * @return 创建的用户
+   */
+  UserModel createUser(String email, String password, String origin);
 
   /**
    * 将数据库对象转换为graphql对象
@@ -91,4 +104,11 @@ public interface UserService extends IService<UserModel> {
    * @return graphql对象
    */
   User convertDbModelToGraphqlModel(UserModel dbModel);
+
+  /**
+   * 用户登录
+   * @param dto 用户登录信息
+   * @return
+   */
+  LoginResponseDTO userLogin(LoginDTO dto);
 }

@@ -37,3 +37,8 @@ logging:
   level:
     root: debug
     com.bcs: debug
+
+server:
+  encryption:
+    key: 9a5d22bb7a574b4a
+    iv: b0dc03953105eab2

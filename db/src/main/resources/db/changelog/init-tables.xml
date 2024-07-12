@@ -318,6 +318,9 @@
       <column name="refresh_token" type="varchar(512)" remarks="刷新令牌"/>
       <column name="current_rest_session" type="JSON" remarks="当前REST会话"/>
       <column name="current_gql_session" type="JSON" remarks="当前GQL会话"/>
+      <column defaultValueNumeric="0" name="status" remarks="用户启用状态：0-禁用；1-启用" type="INT">
+        <constraints nullable="false"/>
+      </column>
       <column defaultValueNumeric="0" name="deleted" type="INT" remarks="是否已删除：0-否；1-是">
         <constraints nullable="false"/>
       </column>

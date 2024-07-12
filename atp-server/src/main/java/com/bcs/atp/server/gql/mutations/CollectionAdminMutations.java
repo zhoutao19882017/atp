@@ -1,7 +1,22 @@
 package com.bcs.atp.server.gql.mutations;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.bcs.atp.server.gql.types.UserCollection;
+import com.bcs.atp.server.model.UserCollectionModel;
+import com.bcs.atp.server.model.UserModel;
+import com.bcs.atp.server.service.UserCollectionService;
+import com.bcs.atp.server.util.AuthUserUtil;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.netflix.graphql.dgs.DgsComponent;
+import com.netflix.graphql.dgs.DgsDataFetchingEnvironment;
+import com.netflix.graphql.dgs.DgsMutation;
+import com.netflix.graphql.dgs.InputArgument;
+import io.micrometer.core.instrument.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import java.io.IOException;
+import java.util.Map;
 
 @Slf4j
 @DgsComponent
@@ -216,4 +231,44 @@ public class CollectionAdminMutations {
  *   ): UserCollection!
  *
  */
+
+    @Autowired
+    private UserCollectionService userCollectionService;
+    @Autowired
+    private AuthUserUtil authUserUtil;
+    @DgsMutation
+    public UserCollection createRESTRootUserCollection(DgsDataFetchingEnvironment dfe, @InputArgument("title") String title, @InputArgument("data") String data){
+        UserModel userModel = authUserUtil.getAuthUser(dfe);
+        String userId = userModel.getId();
+        // Validate title length
+        if (StringUtils.isBlank(title)){
+            throw new IllegalArgumentException("Title is too short");
+        }
+        // Validate data
+        if (StringUtils.isBlank(data)) {
+            throw new IllegalArgumentException("Data is invalid");
+        }
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            // 将JSON字符串转换为Map
+            Map<String, Object> map = mapper.readValue(data, Map.class);
+        } catch (IOException e) {
+            throw new IllegalArgumentException("Data is invalid", e);
+        }
+
+        LambdaQueryWrapper<UserCollectionModel> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+        lambdaQueryWrapper.eq(UserCollectionModel::getUserId, userId);
+        int orderIndex = userCollectionService.count(lambdaQueryWrapper);
+        // Create the user collection
+        UserCollectionModel userCollectionModel = UserCollectionModel.builder()
+                .userId(userId)
+                .title(title)
+                .orderIndex(orderIndex + 1)
+                .type("REST")
+                .data(data)
+                .build();
+        userCollectionService.create(userCollectionModel);
+        return userCollectionService.convertDbModelToGraphqlModel(userCollectionModel);
+    }
+
 }

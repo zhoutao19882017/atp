@@ -2,12 +2,9 @@ package com.bcs.atp.server.controller.v1;
 
 import com.bcs.atp.server.error.ResponseEnum;
 import com.bcs.atp.server.gql.types.AuthProvider;
-import com.bcs.atp.server.model.dto.DeviceIdentifierToken;
-import com.bcs.atp.server.model.dto.JwtTokenDto;
-import com.bcs.atp.server.model.dto.SignInMagicDto;
-import com.bcs.atp.server.model.dto.VerifyMagicDto;
+import com.bcs.atp.server.model.dto.*;
+import com.bcs.atp.server.service.UserService;
 import com.bcs.atp.server.service.auth.IAuthService;
-import com.bcs.atp.server.util.AuthHelper;
 import com.soulcraft.network.resp.R;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -31,12 +28,6 @@ import java.util.stream.Collectors;
 @Api(tags = {"授权管理"})
 @RequestMapping("/v1/auth")
 public class AuthController {
-
-  /**
-   * 默认的登录方式：Email
-   */
-  private static final AuthProvider DEFAULT_AUTH_PROVIDER = AuthProvider.EMAIL;
-
   @Value("${infra.auth.allowedAuthProviders}")
   private AuthProvider[] allowedAuthProviders;
 
@@ -46,18 +37,18 @@ public class AuthController {
   @Autowired
   private IAuthService authService;
 
+  @Autowired
+  private UserService userService;
+
   @ApiOperation("支持的登录方式列表")
   @GetMapping("/providers")
   public R<List<String>> providers() {
     return R.success(Arrays.stream(allowedAuthProviders).map(Enum::name).collect(Collectors.toList()));
   }
 
-  @ApiOperation("用户登录")
+  @ApiOperation("用户登录-邮箱链接")
   @PostMapping("/signin")
   public R<DeviceIdentifierToken> signInAdminWithMagicLink(@Validated @RequestBody SignInMagicDto dto, @RequestParam(required = false) String origin) {
-    // 检查是不是系统支持的登录方式
-    boolean authProviderCheck = AuthHelper.authProviderCheck(DEFAULT_AUTH_PROVIDER, allowedAuthProviders);
-    ResponseEnum.AUTH_PROVIDER_NOT_SUPPORTED.assertTrue(authProviderCheck, DEFAULT_AUTH_PROVIDER);
     // check to see if origin is valid
     if (origin != null){
       boolean originValidated = validAdminOrigin.equals(origin);
@@ -65,6 +56,18 @@ public class AuthController {
     }
     // authService.signInMagicLink
     return R.success(authService.signInMagicLink(dto.getEmail(), origin));
+  }
+
+  @ApiOperation("用户登录")
+  @PostMapping("/login")
+  public R<?> login(@Validated @RequestBody LoginDTO dto) {
+    return R.success(userService.userLogin(dto));
+  }
+
+  @ApiOperation("用户注册")
+  @PostMapping("/signup")
+  public R<?> signup(@Validated @RequestBody SignupDTO dto, @RequestParam(required = false) String origin) {
+    return R.success(authService.signupMagicLink(dto, origin));
   }
 
   @ApiOperation("用户登录令牌验证")

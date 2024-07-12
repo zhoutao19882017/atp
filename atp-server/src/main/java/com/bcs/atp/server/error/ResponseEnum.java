@@ -15,7 +15,10 @@ public enum ResponseEnum implements BusinessExceptionAssert {
   EMAIL_NOT_VALID(905, "Email {0} not valid."),
   EMAIL_SEND_FAILED(906, "Failed to send email to {0}."),
   ORIGIN_NOT_VALID(907, "Origin {0} not valid."),
-  INFRA_CONFIG_NOT_FOUND(404, "infra_config/not_found")
+  INFRA_CONFIG_NOT_FOUND(404, "infra_config/not_found"),
+  PASSWORD_INVALID(101, "password invalid"),
+  USER_ALREADY_EXIST(102, "user already exist"),
+  PASSWORD_NOT_MATCH(103, "password doesn't match"),
   ;
 
   /**

@@ -5,40 +5,30 @@ import com.bcs.atp.server.gql.types.ReqType;
 import com.bcs.atp.server.gql.types.UserCollection;
 import com.bcs.atp.server.gql.types.UserCollectionExportJSONData;
 import com.bcs.atp.server.model.UserCollectionModel;
-import com.bcs.atp.server.model.user.UserDetails;
+import com.bcs.atp.server.model.UserModel;
 import com.bcs.atp.server.service.UserCollectionService;
+import com.bcs.atp.server.util.AuthUserUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.netflix.graphql.dgs.DgsComponent;
+import com.netflix.graphql.dgs.DgsDataFetchingEnvironment;
 import com.netflix.graphql.dgs.DgsQuery;
-import graphql.schema.DataFetchingEnvironment;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 
 @DgsComponent
 @Slf4j
 public class ExportUserCollectionsToJSONDatafetcher {
   @Autowired
   private UserCollectionService userCollectionService;
+  @Autowired
+  private AuthUserUtil authUserUtil;
 
   @DgsQuery(field = DgsConstants.QUERY.ExportUserCollectionsToJSON)
-  public UserCollectionExportJSONData getExportUserCollectionsToJSON(DataFetchingEnvironment dataFetchingEnvironment) {
-    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-    if (authentication == null){
-      return new UserCollectionExportJSONData();
-    }
-    Object principal = authentication.getPrincipal();
-    if (!(principal instanceof UserDetails) || ((UserDetails) principal).getUsername().equals("anonymousUser")) {
-      return new UserCollectionExportJSONData();
-    }
-    UserDetails userDetails = (UserDetails) principal;
-    String userId = userDetails.getUserId();
-
+  public UserCollectionExportJSONData getExportUserCollectionsToJSON(DgsDataFetchingEnvironment dfe) {
+    log.info("Dgs查询,ExportUserCollectionsToJSONDatafetcher.UserCollectionExportJSONData");
+    UserModel userModel = authUserUtil.getAuthUser(dfe);
+    String userId = userModel.getId();
     String collections = getUserCollections(userId);
-    if (collections == null) {
-      return new UserCollectionExportJSONData();
-    }
     return UserCollectionExportJSONData.newBuilder()
       .exportedCollection(collections)
       .collectionType(ReqType.GQL)

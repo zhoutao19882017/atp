@@ -37,20 +37,28 @@ public class AuthUserUtil {
      * @return
      */
     public UserModel getAuthUser(DgsDataFetchingEnvironment dfe){
+        String username = getUserNameByToken(dfe);
+        UserDetails userDetails = (UserDetails) userService.loadUserByUsername(username);
+        return userDetails.getUser();
+    }
+
+    public String getUserNameByToken(DgsDataFetchingEnvironment dfe){
         // 通过DgsDataFetchingEnvironment入参获取用户信息
         DgsWebMvcRequestData requestData = (DgsWebMvcRequestData) dfe.getDgsContext().getRequestData();
         ServletWebRequest request = (ServletWebRequest) requestData.getWebRequest();
         String authHeader = request.getHeader(tokenHeader);
+        String operationName = dfe.getOperationDefinition().getName();
         if (authHeader == null || !authHeader.startsWith(this.tokenHead)) {
+            log.error("AuthUserUtil.getAuthUser获取当前登录用户信息,authHeader异常,operationName:{},authHeader:{}", operationName, authHeader);
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, CommonConstant.COOKIES_NOT_FOUND);
         }
         String authToken = authHeader.substring(this.tokenHead.length());// The part after "Bearer "
         String username = jwtTokenUtil.getUserNameFromToken(authToken);
         log.debug("checking username:{}", username);
         if (username == null || !jwtTokenUtil.validateToken(authToken, username)) {
+            log.error("AuthUserUtil.getAuthUser获取当前登录用户信息,authToken异常,operationName:{}, authToken:", operationName, authToken);
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Unauthorized");
         }
-        UserDetails userDetails = (UserDetails) userService.loadUserByUsername(username);
-        return userDetails.getUser();
+        return username;
     }
 }

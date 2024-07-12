@@ -61,5 +61,9 @@ public class UserModel extends BaseUuidModel {
   @TableField("current_gql_session")
   private String currentGqlSession;
 
+  @ApiModelProperty(value = "用户启用状态：0-未启用；1-启用")
+  @TableField("status")
+  private EYesOrNo status;
+
 
 }

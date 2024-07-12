@@ -94,8 +94,9 @@ secure:
       - /subscriptions
       - /ping
       - /v1/auth/providers
-      - /v1/auth/signIn
+      - /v1/auth/signup
       - /v1/auth/signin
+      - /v1/auth/login
       - /v1/auth/verify
       - /v1/auth/logout
       - /v1/site/setup

@@ -4,16 +4,16 @@ import cn.hutool.core.bean.BeanUtil;
 import com.bcs.atp.server.gql.types.ReqType;
 import com.bcs.atp.server.gql.types.UserHistory;
 import com.bcs.atp.server.model.UserHistoryModel;
-import com.bcs.atp.server.model.user.UserDetails;
+import com.bcs.atp.server.model.UserModel;
 import com.bcs.atp.server.service.UserHistoryService;
+import com.bcs.atp.server.util.AuthUserUtil;
 import com.netflix.graphql.dgs.DgsComponent;
+import com.netflix.graphql.dgs.DgsDataFetchingEnvironment;
 import com.netflix.graphql.dgs.DgsMutation;
 import com.netflix.graphql.dgs.InputArgument;
 import com.soulcraft.mybatis.common.enums.EYesOrNo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 
 @Slf4j
 @DgsComponent
@@ -190,25 +190,18 @@ public class RequestAdminMutations {
  */
     @Autowired
     private UserHistoryService userHistoryService;
+    @Autowired
+    private AuthUserUtil authUserUtil;
 
     @DgsMutation
-    public UserHistory createUserHistory(@InputArgument String reqData, @InputArgument String resMetadata, ReqType reqType){
+    public UserHistory createUserHistory(DgsDataFetchingEnvironment dfe, @InputArgument String reqData, @InputArgument String resMetadata, ReqType reqType){
         String userId = "";
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication != null) {
-            Object principal = authentication.getPrincipal();
-            if (principal instanceof UserDetails) {
-                UserDetails userDetails = (UserDetails) principal;
-                userId = userDetails.getUserId();
-            }
+        try{
+            UserModel userModel = authUserUtil.getAuthUser(dfe);
+            userId = userModel.getId();
+        }catch (Exception e){
+            log.error("createUserHistory,获取用户信息异常");
         }
-        // 第二种，通过DgsDataFetchingEnvironment入参获取用户信息
-//        DgsWebMvcRequestData requestData = (DgsWebMvcRequestData) dgsEnv.getDgsContext().getRequestData();
-//        ServletWebRequest webRequest = (ServletWebRequest) requestData.getWebRequest();
-//        String userEmail = webRequest.getUserPrincipal().getName();
-//        if (userEmail != null) {
-//            userId = userService.lambdaQuery().eq(UserModel::getEmail, userEmail).one().getId();
-//        }
 
         UserHistoryModel userHistoryModel = UserHistoryModel.builder()
                 .userId(userId)

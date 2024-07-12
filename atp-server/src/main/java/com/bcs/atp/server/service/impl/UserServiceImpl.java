@@ -7,20 +7,27 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.bcs.atp.server.error.ResponseEnum;
 import com.bcs.atp.server.gql.types.AuthProvider;
 import com.bcs.atp.server.gql.types.ReqType;
 import com.bcs.atp.server.gql.types.User;
 import com.bcs.atp.server.mapper.UserMapper;
+import com.bcs.atp.server.mapper.VerificationTokenMapper;
 import com.bcs.atp.server.model.*;
+import com.bcs.atp.server.model.dto.JwtTokenDto;
+import com.bcs.atp.server.model.dto.LoginDTO;
+import com.bcs.atp.server.model.dto.LoginResponseDTO;
 import com.bcs.atp.server.model.qo.UserPageQo;
 import com.bcs.atp.server.model.user.UserDetails;
 import com.bcs.atp.server.service.*;
+import com.bcs.atp.server.util.JwtTokenUtil;
 import com.soulcraft.mybatis.common.enums.EYesOrNo;
 import com.soulcraft.network.resp.error.DbResponseEnum;
+import io.micrometer.core.instrument.util.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
@@ -45,14 +52,14 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserModel> implemen
   private UserHistoryService userHistoryService;
   @Autowired
   private UserSettingsService userSettingsService;
-  @Value("${infra.auth.defaultPassword}")
-  private String defaultPassword;
   @Value("${infra.auth.validAdminOrigin}")
   private String validAdminOrigin;
   @Autowired
-  private PasswordEncoder passwordEncoder;
-  @Autowired
   private AccountService accountService;
+  @Autowired
+  private VerificationTokenMapper verificationTokenMapper;;
+  @Autowired
+  private JwtTokenUtil jwtTokenUtil;
 
   @Override
   public boolean create(UserModel user) {
@@ -91,53 +98,38 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserModel> implemen
   }
 
   @Override
-  public UserModel createUserViaMagicLink(String email, String origin) {
+  @Transactional
+  public UserModel createUserViaMagicLink(String email, String password, String origin) {
     QueryWrapper<UserModel> queryWrapper = new QueryWrapper<>();
     queryWrapper.lambda().eq(UserModel::getEmail, email);
     UserModel user = getOne(queryWrapper);
     if (user != null) {
       return user;
     }
-    // 创建用户信息
-    user = UserModel.builder()
-      .email(email)
-      .password(passwordEncoder.encode(defaultPassword))
-      .displayName(email)
-      .photoUrl("")
-      .isAdmin(validAdminOrigin.equals(origin) ? EYesOrNo.YES : EYesOrNo.NO)
-      .currentGqlSession(JSONUtil.toJsonStr(JSONUtil.createArray()))
-      .currentRestSession(JSONUtil.toJsonStr(JSONUtil.createArray()))
-      .build();
-    boolean userCreated = create(user);
-    DbResponseEnum.RECORD_CREATE_FAILED.assertTrue(userCreated);
+    return createNewUser(email, password, origin);
+  }
 
-    // AccountModel
-    String provider = AuthProvider.EMAIL.name();
-    AccountModel account = AccountModel.builder()
-      .userId(user.getId())
-      .provider(provider)
-      .providerAccountId(email)
-      .build();
-    boolean accountCreated = accountService.create(account);
-    DbResponseEnum.RECORD_CREATE_FAILED.assertTrue(accountCreated);
-
-    // UserModel settings
-    UserSettingsModel userSettings = UserSettingsModel.builder()
-      .userId(user.getId())
-      .properties(JSONUtil.toJsonStr(JSONUtil.createObj()))
-      .build();
-    boolean settingsCreated = userSettingsService.create(userSettings);
-    DbResponseEnum.RECORD_CREATE_FAILED.assertTrue(settingsCreated);
-
-    // UserModel Environment
-    UserEnvironmentModel userEnvironment = UserEnvironmentModel.builder()
-      .userId(user.getId())
-      .isGlobal(EYesOrNo.YES)
-      .variables(JSONUtil.toJsonStr(JSONUtil.createArray()))
-      .build();
-    boolean envCreated = userEnvironmentService.create(userEnvironment);
-    DbResponseEnum.RECORD_CREATE_FAILED.assertTrue(envCreated);
-    return user;
+  @Override
+  @Transactional
+  public UserModel createUser(String email, String password, String origin) {
+    QueryWrapper<UserModel> queryWrapper = new QueryWrapper<>();
+    queryWrapper.lambda().eq(UserModel::getEmail, email);
+    UserModel user = getOne(queryWrapper);
+    if (user != null) {
+      // 如果用户已经注册，并启用，抛出异常-用户已存在
+      if (EYesOrNo.YES.equals(user.getStatus())){
+        ResponseEnum.USER_ALREADY_EXIST.assertNull(user);
+      }
+      // 如果用户已经注册，但是未启用，1、需要删除之前注册生成的token，重新生成；2、更新最新的密码
+      LambdaQueryWrapper<VerificationTokenModel> tokenQueryWrapper = new LambdaQueryWrapper<>();
+      tokenQueryWrapper.eq(VerificationTokenModel::getUserId, user.getId());
+      verificationTokenMapper.delete(tokenQueryWrapper);
+      // 更新密码
+      user.setPassword(password);
+      update(user);
+      return user;
+    }
+    return createNewUser(email, password, origin);
   }
 
   @Override
@@ -204,5 +196,84 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserModel> implemen
       .map(userHistory -> userHistoryService.convertDbModelToGraphqlModel(userHistory))
       .collect(Collectors.toList()));
     return userType;
+  }
+
+  @Override
+  public LoginResponseDTO userLogin(LoginDTO dto) {
+    User user = checkUser(dto);
+    LoginResponseDTO loginResponseDTO = new LoginResponseDTO();
+    loginResponseDTO.setUser(user);
+    // 生成令牌
+    String email = user.getEmail();
+    String accessToken = jwtTokenUtil.generateAccessToken(email);
+    String refreshToken = jwtTokenUtil.generateRefreshToken(email);
+    JwtTokenDto jwtTokenDto = JwtTokenDto.builder()
+            .accessToken(accessToken)
+            .refreshToken(refreshToken)
+            .build();
+    loginResponseDTO.setJwtTokenDto(jwtTokenDto);
+    return loginResponseDTO;
+  }
+
+  public User checkUser(LoginDTO dto) {
+    QueryWrapper<UserModel> queryWrapper = new QueryWrapper<>();
+    queryWrapper.lambda().eq(UserModel::getEmail, dto.getEmail()).eq(UserModel::getStatus, EYesOrNo.YES);
+    UserModel userModel = getOne(queryWrapper);
+    ResponseEnum.USER_NOT_FOUND.assertNotNull(userModel, dto.getEmail());
+    String password = dto.getPassword();
+    ResponseEnum.PASSWORD_NOT_MATCH.assertTrue(!StringUtils.isBlank(password) && password.equals(userModel.getPassword()));
+    // 管理员用户检查
+    if (validAdminOrigin.equals(dto.getOrigin())) {
+      ResponseEnum.USER_NOT_FOUND.assertTrue(EYesOrNo.YES.equals(userModel.getIsAdmin()));
+    }
+    User user = new User();
+    BeanUtil.copyProperties(userModel, user);
+    user.setUid(userModel.getId());
+    return user;
+  }
+
+  @Transactional
+  public UserModel createNewUser(String email, String password, String origin) {
+    // 创建用户信息
+    UserModel user = UserModel.builder()
+            .email(email)
+            .password(password)
+            .displayName(email)
+            .photoUrl("")
+            .isAdmin(validAdminOrigin.equals(origin) ? EYesOrNo.YES : EYesOrNo.NO)
+            .currentGqlSession(JSONUtil.toJsonStr(JSONUtil.createArray()))
+            .currentRestSession(JSONUtil.toJsonStr(JSONUtil.createArray()))
+            .status(EYesOrNo.NO) //默认 0-未启用
+            .build();
+    boolean userCreated = create(user);
+    DbResponseEnum.RECORD_CREATE_FAILED.assertTrue(userCreated);
+
+    // AccountModel
+    String provider = AuthProvider.EMAIL.name();
+    AccountModel account = AccountModel.builder()
+            .userId(user.getId())
+            .provider(provider)
+            .providerAccountId(email)
+            .build();
+    boolean accountCreated = accountService.create(account);
+    DbResponseEnum.RECORD_CREATE_FAILED.assertTrue(accountCreated);
+
+    // UserModel settings
+    UserSettingsModel userSettings = UserSettingsModel.builder()
+            .userId(user.getId())
+            .properties(JSONUtil.toJsonStr(JSONUtil.createObj()))
+            .build();
+    boolean settingsCreated = userSettingsService.create(userSettings);
+    DbResponseEnum.RECORD_CREATE_FAILED.assertTrue(settingsCreated);
+
+    // UserModel Environment
+    UserEnvironmentModel userEnvironment = UserEnvironmentModel.builder()
+            .userId(user.getId())
+            .isGlobal(EYesOrNo.YES)
+            .variables(JSONUtil.toJsonStr(JSONUtil.createArray()))
+            .build();
+    boolean envCreated = userEnvironmentService.create(userEnvironment);
+    DbResponseEnum.RECORD_CREATE_FAILED.assertTrue(envCreated);
+    return user;
   }
 }

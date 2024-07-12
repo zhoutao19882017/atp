@@ -2,6 +2,7 @@ package com.bcs.atp.server.service.auth;
 
 import com.bcs.atp.server.model.dto.DeviceIdentifierToken;
 import com.bcs.atp.server.model.dto.JwtTokenDto;
+import com.bcs.atp.server.model.dto.SignupDTO;
 import com.bcs.atp.server.model.dto.VerifyMagicDto;
 
 /**
@@ -19,6 +20,15 @@ public interface IAuthService {
    * @return 用户标识和令牌
    */
   DeviceIdentifierToken signInMagicLink(String email, String origin);
+
+  /**
+   * 注册并发送登录链接
+   *
+   * @param dto  用户注册参数：邮箱地址, 密码
+   * @param origin 来源
+   * @return 用户标识和令牌
+   */
+  DeviceIdentifierToken signupMagicLink(SignupDTO dto, String origin);
 
   /**
    * 校验令牌
