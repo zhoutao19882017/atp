@@ -1,12 +1,14 @@
 package com.bcs.atp.server.service.impl;
 
+import cn.hutool.core.bean.BeanUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.bcs.atp.server.constant.InfraConfigEnum;
+import com.bcs.atp.server.gql.types.InfraConfig;
+import com.bcs.atp.server.gql.types.InfraConfigEnum;
 import com.bcs.atp.server.gql.types.ServiceStatus;
 import com.bcs.atp.server.mapper.InfraConfigMapper;
 import com.bcs.atp.server.model.InfraConfigModel;
@@ -19,6 +21,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -82,7 +85,7 @@ public class InfraConfigServiceImpl extends ServiceImpl<InfraConfigMapper, Infra
   @Override
   public boolean toggleAnalyticsCollection(ServiceStatus status) {
     LambdaUpdateWrapper<InfraConfigModel> updateWrapper = new LambdaUpdateWrapper<>();
-    updateWrapper.eq(InfraConfigModel::getName, InfraConfigEnum.ALLOW_ANALYTICS_COLLECTION.getValue());
+    updateWrapper.eq(InfraConfigModel::getName, InfraConfigEnum.ALLOW_ANALYTICS_COLLECTION.name());
     updateWrapper.set(InfraConfigModel::getValue, status == ServiceStatus.ENABLE ? "true" : "false");
     return update(updateWrapper);
   }
@@ -90,9 +93,28 @@ public class InfraConfigServiceImpl extends ServiceImpl<InfraConfigMapper, Infra
   @Override
   public boolean setSetupAsComplete() {
     LambdaUpdateWrapper<InfraConfigModel> updateWrapper = new LambdaUpdateWrapper<>();
-    updateWrapper.eq(InfraConfigModel::getName, InfraConfigEnum.IS_FIRST_TIME_INFRA_SETUP.getValue());
+    updateWrapper.eq(InfraConfigModel::getName, InfraConfigEnum.IS_FIRST_TIME_INFRA_SETUP.name());
     updateWrapper.set(InfraConfigModel::getValue, "false");
     return update(updateWrapper);
+  }
+
+  @Override
+  public InfraConfig convertDbModelToGraphqlModel(InfraConfigModel infraConfigModel) {
+    InfraConfig infraConfig = new InfraConfig();
+    BeanUtil.copyProperties(infraConfigModel, infraConfig);
+    return infraConfig;
+  }
+
+  @Override
+  public List<InfraConfig> findInfraConfigByNames(InfraConfigEnum[] configNames) {
+    LambdaQueryWrapper<InfraConfigModel> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+    List<InfraConfigEnum> excludedConfigs = Arrays.asList(InfraConfigEnum.EXCLUDE_FROM_FETCH_CONFIGS);
+    List<InfraConfigEnum> invalidConfigs = Arrays.stream(configNames).filter(excludedConfigs::contains).collect(Collectors.toList());
+    if (!invalidConfigs.isEmpty()) {
+      throw new IllegalArgumentException("infra_config/operation_not_allowed");
+    }
+    Arrays.stream(configNames).map(infraConfigEnum -> lambdaQueryWrapper.eq(InfraConfigModel::getName, infraConfigEnum));
+    return list(lambdaQueryWrapper).stream().map(InfraConfigModel -> convertDbModelToGraphqlModel(InfraConfigModel)).collect(Collectors.toList());
   }
 
   /**
@@ -115,8 +137,8 @@ public class InfraConfigServiceImpl extends ServiceImpl<InfraConfigMapper, Infra
   }
 
   private void initializeConfig(Set<String> existingConfigs, InfraConfigEnum configEnum, String value) {
-    if (!existingConfigs.contains(configEnum.getValue())) {
-      InfraConfigModel newConfig = new InfraConfigModel(configEnum.getValue(), value, EYesOrNo.YES);
+    if (!existingConfigs.contains(configEnum.name())) {
+      InfraConfigModel newConfig = new InfraConfigModel(configEnum.name(), value, EYesOrNo.YES);
       create(newConfig);
     }
   }

@@ -18,7 +18,7 @@ import com.bcs.atp.server.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -68,26 +68,46 @@ public class UserCollectionServiceImpl extends ServiceImpl<UserCollectionMapper,
 
   @Override
   public UserCollection convertDbModelToGraphqlModel(UserCollectionModel userCollectionModel) {
+    return convertDbModelToGraphqlModel(userCollectionModel, new HashMap<>());
+  }
+
+  public UserCollection convertDbModelToGraphqlModel(UserCollectionModel userCollectionModel, Map<String, UserCollection> cache) {
+    // 使用userId作为键，避免重复转换同一个用户
+    String userId = userCollectionModel.getUserId();
+    if (cache.containsKey(userId)) {
+      return cache.get(userId);
+    }
+
     UserCollection userCollection = new UserCollection();
     BeanUtil.copyProperties(userCollectionModel, userCollection);
-    String userId = userCollectionModel.getUserId();
+
+    // 添加到缓存前先完成基本属性的复制，避免循环引用
+    cache.put(userId, userCollection);
+
+    // 递归填充用户信息
     userCollection.setUser(userService.convertDbModelToGraphqlModel(userService.getById(userId)));
+
     if (userCollectionModel.getParentId() != null) {
       UserCollectionModel parentUserCollectionModel = getById(userCollectionModel.getParentId());
-      UserCollection parentUserCollection = convertDbModelToGraphqlModel(parentUserCollectionModel);
+      UserCollection parentUserCollection = convertDbModelToGraphqlModel(parentUserCollectionModel, cache);
       userCollection.setParent(parentUserCollection);
     }
+
     String id = userCollectionModel.getId();
     List<UserCollectionModel> userCollectionModelList = lambdaQuery().eq(UserCollectionModel::getParentId, id).list();
-    for (UserCollectionModel model: userCollectionModelList) {
-      if (ReqType.REST.name().equals(model.getType())){
-        userCollection.getChildrenREST().add(convertDbModelToGraphqlModel(model));
+    for (UserCollectionModel model : userCollectionModelList) {
+      if (ReqType.REST.name().equals(model.getType())) {
+        userCollection.getChildrenREST().add(convertDbModelToGraphqlModel(model, cache));
       }
-      if (ReqType.GQL.name().equals(model.getType())){
-        userCollection.getChildrenGQL().add(convertDbModelToGraphqlModel(model));
+      if (ReqType.GQL.name().equals(model.getType())) {
+        userCollection.getChildrenGQL().add(convertDbModelToGraphqlModel(model, cache));
       }
     }
-    userCollection.setRequests(userRequestService.lambdaQuery().eq(UserRequestModel::getUserId, userId).list().stream().map(userRequestService::convertDbModelToGraphqlModel).collect(Collectors.toList()));
+
+    userCollection.setRequests(userRequestService.lambdaQuery().eq(UserRequestModel::getUserId, userId).list()
+            .stream().map(userRequestService::convertDbModelToGraphqlModel).collect(Collectors.toList()));
+
     return userCollection;
   }
+
 }

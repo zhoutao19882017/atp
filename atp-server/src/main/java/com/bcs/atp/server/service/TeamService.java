@@ -1,5 +1,6 @@
 package com.bcs.atp.server.service;
 
+import com.bcs.atp.server.gql.types.Team;
 import com.bcs.atp.server.model.TeamModel;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
@@ -64,4 +65,11 @@ public interface TeamService extends IService<TeamModel> {
    * @return 所有对象
    */
   List<TeamModel> listAll();
+
+  /**
+   * 将数据库对象转换为graphql对象
+   * @param teamModel
+   * @return
+   */
+  Team convertDbModelToGraphqlModel(TeamModel teamModel);
 }

@@ -1,17 +1,29 @@
 package com.bcs.atp.server.gql.mutations;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.bcs.atp.server.gql.types.User;
-import com.netflix.graphql.dgs.DgsComponent;
-import com.netflix.graphql.dgs.DgsMutation;
-import com.netflix.graphql.dgs.InputArgument;
+import com.bcs.atp.server.gql.types.UserSettings;
 import com.bcs.atp.server.model.UserModel;
+import com.bcs.atp.server.model.UserSettingsModel;
 import com.bcs.atp.server.model.user.UserDetails;
 import com.bcs.atp.server.service.UserService;
+import com.bcs.atp.server.service.UserSettingsService;
+import com.bcs.atp.server.util.AuthUserUtil;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.netflix.graphql.dgs.DgsComponent;
+import com.netflix.graphql.dgs.DgsDataFetchingEnvironment;
+import com.netflix.graphql.dgs.DgsMutation;
+import com.netflix.graphql.dgs.InputArgument;
 import com.soulcraft.network.resp.error.DbResponseEnum;
+import io.micrometer.core.instrument.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+
+import java.io.IOException;
+import java.util.Map;
 
 @Slf4j
 @DgsComponent
@@ -99,9 +111,6 @@ public class UserAdminMutations {
    * ): Boolean!
    */
 
-  @Autowired
-  private UserService userService;
-
   /**
    * <pre>
    * Mutation definition
@@ -117,6 +126,14 @@ public class UserAdminMutations {
    * @param updatedDisplayName New name of user
    * @return User
    */
+
+  @Autowired
+  private UserService userService;
+  @Autowired
+  private AuthUserUtil authUserUtil;
+  @Autowired
+  private UserSettingsService userSettingsService;
+
   @DgsMutation
   public User updateDisplayName(@InputArgument String updatedDisplayName) {
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -134,5 +151,38 @@ public class UserAdminMutations {
     DbResponseEnum.RECORD_UPDATE_FAILED.assertTrue(updated);
 
     return userService.convertDbModelToGraphqlModel(user);
+  }
+
+  @DgsMutation
+  public UserSettings updateUserSettings(DgsDataFetchingEnvironment dfe, @InputArgument("properties") String properties){
+    if (StringUtils.isBlank(properties)){
+      throw new IllegalArgumentException("user_settings/null_settings");
+    }
+    ObjectMapper mapper = new ObjectMapper();
+    try {
+      // 将JSON字符串转换为Map
+      Map<String, Object> map = mapper.readValue(properties, Map.class);
+    } catch (IOException e) {
+      throw new IllegalArgumentException("properties is invalid", e);
+    }
+    //更新数据库
+    UserModel userModel = authUserUtil.getAuthUser(dfe);
+    String userId = userModel.getId();
+    LambdaUpdateWrapper<UserSettingsModel> updateWrapper = new LambdaUpdateWrapper<>();
+    updateWrapper.eq(UserSettingsModel::getUserId, userId)
+            .set(UserSettingsModel::getProperties, properties);
+    boolean result = userSettingsService.lambdaUpdate()
+            .eq(UserSettingsModel::getUserId, userId)
+            .set(UserSettingsModel::getProperties, properties)
+            .update();
+    if (!result){
+      throw new IllegalArgumentException("updateUserSettings error");
+    }
+    LambdaQueryWrapper<UserSettingsModel> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+    lambdaQueryWrapper.eq(UserSettingsModel::getUserId, userId);
+    UserSettingsModel userSettingsModel = userSettingsService.getOne(lambdaQueryWrapper);
+    // Publish subscription for user settings update
+    //    await this.pubsub.publish(`user_settings/${user.uid}/updated`, settings);
+    return userSettingsService.convertDbModelToGraphqlModel(userSettingsModel);
   }
 }

@@ -37,5 +37,11 @@ public enum InfraConfigEnum {
 
   ANALYTICS_USER_ID,
 
-  IS_FIRST_TIME_INFRA_SETUP
+  IS_FIRST_TIME_INFRA_SETUP;
+
+  public static final InfraConfigEnum[] EXCLUDE_FROM_FETCH_CONFIGS = {
+          VITE_ALLOWED_AUTH_PROVIDERS,
+          ANALYTICS_USER_ID,
+          IS_FIRST_TIME_INFRA_SETUP
+  };
 }

@@ -1,5 +1,7 @@
 package com.bcs.atp.server.service.impl;
 
+import cn.hutool.core.bean.BeanUtil;
+import com.bcs.atp.server.gql.types.InvitedUser;
 import com.bcs.atp.server.mapper.InvitedUsersMapper;
 import com.bcs.atp.server.model.InvitedUsersModel;
 import com.bcs.atp.server.model.qo.InvitedUsersPageQo;
@@ -50,5 +52,12 @@ public class InvitedUsersServiceImpl extends ServiceImpl<InvitedUsersMapper, Inv
     QueryWrapper<InvitedUsersModel> wrapper = new QueryWrapper<>();
     LambdaQueryWrapper<InvitedUsersModel> lambda = wrapper.lambda();
     return list(wrapper);
+  }
+
+  @Override
+  public InvitedUser convertDbModelToGraphqlModel(InvitedUsersModel invitedUsersModel) {
+    InvitedUser invitedUser = new InvitedUser();
+    BeanUtil.copyProperties(invitedUsersModel, invitedUser);
+    return invitedUser;
   }
 }

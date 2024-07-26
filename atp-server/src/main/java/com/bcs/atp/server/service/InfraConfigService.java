@@ -2,6 +2,8 @@ package com.bcs.atp.server.service;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.bcs.atp.server.gql.types.InfraConfig;
+import com.bcs.atp.server.gql.types.InfraConfigEnum;
 import com.bcs.atp.server.gql.types.ServiceStatus;
 import com.bcs.atp.server.model.InfraConfigModel;
 import com.bcs.atp.server.model.qo.InfraConfigPageQo;
@@ -86,4 +88,17 @@ public interface InfraConfigService extends IService<InfraConfigModel> {
    */
   boolean setSetupAsComplete();
 
+  /**
+   * 将数据库对象转换为graphql对象
+   * @param infraConfigModel
+   * @return
+   */
+  InfraConfig convertDbModelToGraphqlModel(InfraConfigModel infraConfigModel);
+
+  /**
+   * 通过配置名查配置项
+   * @param configNames
+   * @return
+   */
+  List<InfraConfig> findInfraConfigByNames(InfraConfigEnum[] configNames);
 }

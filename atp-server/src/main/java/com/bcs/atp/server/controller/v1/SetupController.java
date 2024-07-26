@@ -1,9 +1,9 @@
 package com.bcs.atp.server.controller.v1;
 
 import cn.hutool.core.bean.BeanUtil;
-import com.bcs.atp.server.constant.InfraConfigEnum;
 import com.bcs.atp.server.error.ResponseEnum;
 import com.bcs.atp.server.gql.types.InfraConfig;
+import com.bcs.atp.server.gql.types.InfraConfigEnum;
 import com.bcs.atp.server.model.InfraConfigModel;
 import com.bcs.atp.server.service.InfraConfigService;
 import com.soulcraft.network.resp.R;
@@ -27,7 +27,7 @@ public class SetupController {
     @ApiOperation("查询是否初次设置")
     @GetMapping("/setup")
     public R<InfraConfig> fetchSetupInfo() {
-        InfraConfigModel infraConfigModel = infraConfigService.queryByName(InfraConfigEnum.IS_FIRST_TIME_INFRA_SETUP.getValue());
+        InfraConfigModel infraConfigModel = infraConfigService.queryByName(InfraConfigEnum.IS_FIRST_TIME_INFRA_SETUP.name());
         ResponseEnum.INFRA_CONFIG_NOT_FOUND.assertNotNull(infraConfigModel);
         InfraConfig infraConfig = new InfraConfig();
         BeanUtil.copyProperties(infraConfigModel, infraConfig);

@@ -1,7 +1,7 @@
 package com.bcs.atp.server.gql.mutations;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.bcs.atp.server.gql.types.UserCollection;
+import com.bcs.atp.server.gql.types.ReqType;
 import com.bcs.atp.server.model.UserCollectionModel;
 import com.bcs.atp.server.model.UserModel;
 import com.bcs.atp.server.service.UserCollectionService;
@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.Optional;
 
 @Slf4j
 @DgsComponent
@@ -237,7 +238,16 @@ public class CollectionAdminMutations {
     @Autowired
     private AuthUserUtil authUserUtil;
     @DgsMutation
-    public UserCollection createRESTRootUserCollection(DgsDataFetchingEnvironment dfe, @InputArgument("title") String title, @InputArgument("data") String data){
+    public UserCollectionModel createRESTRootUserCollection(DgsDataFetchingEnvironment dfe, @InputArgument("title") String title, @InputArgument("data") String data){
+        return createRESTUserCollection(dfe, title, data, null);
+    }
+
+    @DgsMutation
+    public UserCollectionModel createRESTChildUserCollection(DgsDataFetchingEnvironment dfe, @InputArgument("title") String title, @InputArgument("parentUserCollectionID") String parentUserCollectionID){
+        return createRESTUserCollection(dfe, title, null, parentUserCollectionID);
+    }
+
+    private UserCollectionModel createRESTUserCollection(DgsDataFetchingEnvironment dfe, String title, String data, String parentUserCollectionID){
         UserModel userModel = authUserUtil.getAuthUser(dfe);
         String userId = userModel.getId();
         // Validate title length
@@ -245,30 +255,63 @@ public class CollectionAdminMutations {
             throw new IllegalArgumentException("Title is too short");
         }
         // Validate data
-        if (StringUtils.isBlank(data)) {
-            throw new IllegalArgumentException("Data is invalid");
-        }
-        ObjectMapper mapper = new ObjectMapper();
-        try {
-            // 将JSON字符串转换为Map
-            Map<String, Object> map = mapper.readValue(data, Map.class);
-        } catch (IOException e) {
-            throw new IllegalArgumentException("Data is invalid", e);
+        if (data != null) {
+            if (data.trim().isEmpty()){
+                throw new IllegalArgumentException("Data is invalid");
+            }
+            ObjectMapper mapper = new ObjectMapper();
+            try {
+                // 将JSON字符串转换为Map
+                Map<String, Object> map = mapper.readValue(data, Map.class);
+            } catch (IOException e) {
+                throw new IllegalArgumentException("Data is invalid", e);
+            }
         }
 
+        // If creating a child collection
+        if (!StringUtils.isBlank(parentUserCollectionID)){
+            UserCollectionModel parentUserCollection = userCollectionService.getById(parentUserCollectionID);
+            Optional.ofNullable(parentUserCollection).orElseThrow(() -> new IllegalArgumentException("parentUserCollection does not exist"));
+            if (!parentUserCollection.getUserId().equals(userId)){
+                throw new IllegalArgumentException("user_coll/user_not_owner");
+            }
+            if (!ReqType.REST.name().equals(parentUserCollection.getType())){
+                throw new IllegalArgumentException("user_coll/type_mismatch");
+            }
+        }
+        // 计算orderIndex
         LambdaQueryWrapper<UserCollectionModel> lambdaQueryWrapper = new LambdaQueryWrapper<>();
-        lambdaQueryWrapper.eq(UserCollectionModel::getUserId, userId);
-        int orderIndex = userCollectionService.count(lambdaQueryWrapper);
+        int orderIndex = 0;
+        if (StringUtils.isBlank(parentUserCollectionID)){
+            lambdaQueryWrapper.eq(UserCollectionModel::getUserId, userId).isNull(UserCollectionModel::getParentId);
+            orderIndex = userCollectionService.count(lambdaQueryWrapper) + 1;
+        }else {
+            lambdaQueryWrapper.eq(UserCollectionModel::getParentId, parentUserCollectionID);
+            orderIndex = userCollectionService.count(lambdaQueryWrapper) + 1;
+        }
         // Create the user collection
         UserCollectionModel userCollectionModel = UserCollectionModel.builder()
                 .userId(userId)
                 .title(title)
-                .orderIndex(orderIndex + 1)
-                .type("REST")
+                .orderIndex(orderIndex)
+                .type(ReqType.REST.name())
                 .data(data)
+                .parentId(parentUserCollectionID)
                 .build();
         userCollectionService.create(userCollectionModel);
-        return userCollectionService.convertDbModelToGraphqlModel(userCollectionModel);
+        return userCollectionModel;
+    }
+
+    @DgsMutation
+    public boolean deleteUserCollection(DgsDataFetchingEnvironment dfe, @InputArgument("userCollectionID") String userCollectionID){
+        UserCollectionModel userCollectionModel = userCollectionService.getById(userCollectionID);
+        Optional.ofNullable(userCollectionModel).orElseThrow(() -> new IllegalArgumentException("user_coll/not_found"));
+        UserModel userModel = authUserUtil.getAuthUser(dfe);
+        String userId = userModel.getId();
+        if (!userId.equals(userCollectionModel.getUserId())){
+            throw new IllegalArgumentException("user_coll/user_not_owner");
+        }
+        return userCollectionService.delete(userCollectionID);
     }
 
 }

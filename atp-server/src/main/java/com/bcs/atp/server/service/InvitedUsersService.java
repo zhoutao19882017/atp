@@ -1,8 +1,9 @@
 package com.bcs.atp.server.service;
 
-import com.bcs.atp.server.model.InvitedUsersModel;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.bcs.atp.server.gql.types.InvitedUser;
+import com.bcs.atp.server.model.InvitedUsersModel;
 import com.bcs.atp.server.model.qo.InvitedUsersPageQo;
 
 import java.util.List;
@@ -64,4 +65,12 @@ public interface InvitedUsersService extends IService<InvitedUsersModel> {
    * @return 所有对象
    */
   List<InvitedUsersModel> listAll();
+
+  /**
+   * 将数据库对象转换为graphql对象
+   * @param invitedUsersModel
+   * @return
+   */
+  InvitedUser convertDbModelToGraphqlModel(InvitedUsersModel invitedUsersModel);
+
 }
