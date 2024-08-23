@@ -27,6 +27,6 @@ public class LoginDTO {
     private String password;
 
     @NotEmpty
-    @ApiModelProperty(value = "用户密码", required = true)
+    @ApiModelProperty(value = "用户来源", required = true)
     private String origin;
 }
